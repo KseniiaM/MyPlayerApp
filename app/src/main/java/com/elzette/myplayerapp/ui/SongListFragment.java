@@ -18,9 +18,6 @@ import com.elzette.myplayerapp.models.SongModel;
 import com.elzette.myplayerapp.musicRecyclerView.MusicAdapter;
 import com.elzette.myplayerapp.viewModels.SongListViewModel;
 
-import java.util.Date;
-
-
 public class SongListFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
@@ -34,10 +31,13 @@ public class SongListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+
         viewModel = ViewModelProviders.of(this)
                                       .get(SongListViewModel.class);
 
-        SongListFragmentBinding binding = SongListFragmentBinding.inflate(inflater);
+
+        SongListFragmentBinding binding = //DataBindingUtil.inflate(inflater, R.layout.song_list_fragment, container, false);
+                SongListFragmentBinding.inflate(inflater);
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(this);
 
@@ -47,13 +47,15 @@ public class SongListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         initRecyclerView(view);
         mButton = view.findViewById(R.id.button);
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewModel.songs.add(new SongModel("Red Hot chilly peppers", "californiacation" + new Date()));
+                viewModel.songs.get(0).setArtist("ivy");
                 mAdapter.notifyDataSetChanged();
+                viewModel.addSong();
             }
         });
     }
@@ -65,6 +67,8 @@ public class SongListFragment extends Fragment {
 
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        viewModel.songs.add(new SongModel("Red Hot chilly peppers", "californiacation"));
 
         mAdapter = new MusicAdapter(viewModel.songs, R.layout.song_item);
         mRecyclerView.setAdapter(mAdapter);

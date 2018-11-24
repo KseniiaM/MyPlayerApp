@@ -19,5 +19,4 @@ public class MusicViewHolder extends RecyclerView.ViewHolder {
         binding.setVariable(BR.SongModel, obj);
         binding.executePendingBindings();
     }
-
 }
