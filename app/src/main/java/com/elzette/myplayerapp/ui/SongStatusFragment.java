@@ -6,14 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.elzette.myplayerapp.models.SongModel;
+import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.R;
 
 import java.util.List;
 
 public class SongStatusFragment extends Fragment {
 
-    private List<SongModel> mSongs;
+    private List<Song> mSongs;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

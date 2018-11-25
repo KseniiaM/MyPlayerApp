@@ -3,8 +3,8 @@
 
     <data>
         <variable
-            name="SongModel"
-            type="com.elzette.myplayerapp.models.SongModel" />
+            name="Song"
+            type="com.elzette.myplayerapp.dal.Song" />
     </data>
 
     <LinearLayout
@@ -15,12 +15,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{SongModel.artist}" />
+            android:text="@{Song.artist}" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{SongModel.title}" />
+            android:text="@{Song.title}" />
 
     </LinearLayout>
 

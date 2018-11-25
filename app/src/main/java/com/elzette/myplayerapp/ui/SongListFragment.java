@@ -14,7 +14,6 @@ import android.widget.Button;
 
 import com.elzette.myplayerapp.R;
 import com.elzette.myplayerapp.databinding.SongListFragmentBinding;
-import com.elzette.myplayerapp.models.SongModel;
 import com.elzette.myplayerapp.musicRecyclerView.MusicAdapter;
 import com.elzette.myplayerapp.viewModels.SongListViewModel;
 
@@ -68,7 +67,7 @@ public class SongListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        viewModel.songs.add(new SongModel("Red Hot chilly peppers", "californiacation"));
+        //viewModel.songs.add(new Song("Red Hot chilly peppers", "californiacation"));
 
         mAdapter = new MusicAdapter(viewModel.songs, R.layout.song_item);
         mRecyclerView.setAdapter(mAdapter);
