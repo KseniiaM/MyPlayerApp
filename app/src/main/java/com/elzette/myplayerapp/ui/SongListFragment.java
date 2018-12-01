@@ -19,6 +19,8 @@ import com.elzette.myplayerapp.viewModels.SongListViewModel;
 
 public class SongListFragment extends Fragment {
 
+    private static final String TAG = SongListFragment.class.getSimpleName();
+
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -47,16 +49,24 @@ public class SongListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+//        viewModel.songs.observe(this, new Observer<List<Song>>() {
+//            @Override
+//            public void onChanged(@Nullable List<Song> songs) {
+//                Log.i(TAG, "onChanged " + songs);
+//                mAdapter.notifyDataSetChanged();
+//            }
+//        });
+
         initRecyclerView(view);
         mButton = view.findViewById(R.id.button);
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewModel.songs.get(0).setArtist("ivy");
-                mAdapter.notifyDataSetChanged();
-                viewModel.addSong();
-            }
-        });
+//        mButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                viewModel.songs.get(0).setArtist("ivy");
+//                mAdapter.notifyDataSetChanged();
+//                viewModel.addSong();
+//            }
+//        });
     }
 
     private void initRecyclerView(View view) {

@@ -4,30 +4,27 @@ import android.app.Application;
 import android.util.Log;
 
 import com.elzette.myplayerapp.dal.SongDatabase;
+import com.elzette.myplayerapp.di.ContextModule;
+import com.elzette.myplayerapp.di.DaggerDatabaseComponent;
+import com.elzette.myplayerapp.di.DatabaseComponent;
+import com.elzette.myplayerapp.providers.DatabaseProvider;
 
 public class App extends Application {
 
     private final static String TAG = App.class.getSimpleName();
 
-    private SongDatabase mDatabase;
+    private SongDatabase database;
 
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
-//        mDatabase = DatabaseProvider.getInstance(getApplicationContext()).getDatabase();
-//        DatabaseComponent component = DaggerDatabaseComponent.builder()
-//                                                             .contextModule(new ContextModule(this))
-//                                                             .build();
-//
-//        SongDatabase s1 = component.getSongDatabase();
-//        SongDatabase s2 = component.getSongDatabase();
-//
-//        Log.e("db", s1 + "here is s1");
-//        Log.e("db", s2 + "here is s2");
-    }
+        //mDatabase = DatabaseProvider.getInstance(getApplicationContext()).getDatabase();
+        DatabaseComponent component = DaggerDatabaseComponent.builder()
+                                                             .contextModule(new ContextModule(this))
+                                                             .build();
+        database = component.getSongDatabase();
+        Log.d(TAG, "batat: " + database);
 
-    public SongDatabase getDatabase() {
-        return mDatabase;
     }
 }

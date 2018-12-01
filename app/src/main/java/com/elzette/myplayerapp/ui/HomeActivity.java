@@ -1,34 +1,25 @@
 package com.elzette.myplayerapp.ui;
 
-import android.Manifest;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.Toast;
 
-import com.elzette.myplayerapp.App;
 import com.elzette.myplayerapp.R;
 import com.elzette.myplayerapp.dal.Song;
-import com.elzette.myplayerapp.dal.SongDao;
-import com.elzette.myplayerapp.dal.SongDatabase;
-import com.elzette.myplayerapp.providers.DatabaseProvider;
 import com.elzette.myplayerapp.services.PlayerService;
 
 import java.util.ArrayList;
 
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 public class HomeActivity extends AppCompatActivity {
 
