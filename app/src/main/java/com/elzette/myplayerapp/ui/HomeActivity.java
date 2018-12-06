@@ -1,29 +1,34 @@
 package com.elzette.myplayerapp.ui;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import com.elzette.myplayerapp.Helpers.PermissionManager;
 import com.elzette.myplayerapp.R;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.services.PlayerService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 public class HomeActivity extends AppCompatActivity {
-
-    private final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 111;
 
     private NavController mNavController;
     private PlayerService player;
@@ -35,38 +40,13 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
-//        mNavController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        mNavController.navigate(R.id.songListFragment);
-//
-//        if (ContextCompat.checkSelfPermission(this,
-//                Manifest.permission.READ_EXTERNAL_STORAGE)
-//                != PackageManager.PERMISSION_GRANTED) {
-//                // No explanation needed; request the permission
-//                ActivityCompat.requestPermissions(this,
-//                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-//                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-//
-//                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-//                // app-defined int constant. The callback method gets the
-//                // result of the request.
-//        }
-//        else {
-//            // Permission has already been granted
-//        loadAudio();
-//        //play the first audio in the ArrayList
-//        playAudio(audioList.get(0).getData());
-//        }
-//
-//        SongDatabase db = ((App)getApplication()).getDatabase();
-//        SongDao songDao = db.songDao();
-//        //playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
-//        //later add services as observers
-//        //getLifecycle().addObserver(myServer);
-        //startService(new Intent(this, PlayerService.class));
-    }
+        mNavController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        mNavController.navigate(R.id.songListFragment);
 
-    public void getSongList() {
-        //retrieve song info
+        //playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
+        //later add services as observers
+        //getLifecycle().addObserver(myServer);
+        startService(new Intent(this, PlayerService.class));
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -86,7 +66,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     };
 
-    private void playAudio(String media) {
+    public void playAudio(String media) {
         //Check is service is active
         if (!serviceBound) {
             Intent playerIntent = new Intent(this, PlayerService.class);
@@ -143,4 +123,6 @@ public class HomeActivity extends AppCompatActivity {
         }
         cursor.close();
     }
+
+
 }

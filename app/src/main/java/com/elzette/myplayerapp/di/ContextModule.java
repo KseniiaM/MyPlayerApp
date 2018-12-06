@@ -2,6 +2,8 @@ package com.elzette.myplayerapp.di;
 
 import android.content.Context;
 
+import com.elzette.myplayerapp.viewModels.SongListViewModel;
+
 import dagger.Module;
 import dagger.Provides;
 

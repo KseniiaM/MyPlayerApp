@@ -1,6 +1,9 @@
 package com.elzette.myplayerapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,14 +15,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.elzette.myplayerapp.Helpers.PermissionManager;
 import com.elzette.myplayerapp.R;
 import com.elzette.myplayerapp.databinding.SongListFragmentBinding;
 import com.elzette.myplayerapp.musicRecyclerView.MusicAdapter;
+import com.elzette.myplayerapp.services.PlayerService;
 import com.elzette.myplayerapp.viewModels.SongListViewModel;
 
 public class SongListFragment extends Fragment {
 
     private static final String TAG = SongListFragment.class.getSimpleName();
+    private final int MY_PERMISSIONS_REQUEST_READ_STORAGE = 111;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -49,6 +55,10 @@ public class SongListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        if(PermissionManager.requestReadExternalStoragePermission(this.getActivity())) {
+            viewModel.getAllTracks();
+            ((HomeActivity)getActivity()).playAudio(viewModel.songsLiveData.getValue().get(0).getData());
+        }
 //        viewModel.songs.observe(this, new Observer<List<Song>>() {
 //            @Override
 //            public void onChanged(@Nullable List<Song> songs) {
@@ -69,6 +79,20 @@ public class SongListFragment extends Fragment {
 //        });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_STORAGE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    viewModel.getAllTracks();
+                }
+            }
+
+            // other 'case' statements for other permssions
+        }
+    }
+
     private void initRecyclerView(View view) {
 
         mRecyclerView = view.findViewById(R.id.song_recycler_view);
@@ -79,7 +103,7 @@ public class SongListFragment extends Fragment {
 
         //viewModel.songs.add(new Song("Red Hot chilly peppers", "californiacation"));
 
-        mAdapter = new MusicAdapter(viewModel.songs, R.layout.song_item);
+        mAdapter = new MusicAdapter(viewModel.songsLiveData.getValue(), R.layout.song_item);
         mRecyclerView.setAdapter(mAdapter);
     }
 }
