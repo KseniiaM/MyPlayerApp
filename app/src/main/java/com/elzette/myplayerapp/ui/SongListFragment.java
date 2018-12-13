@@ -17,10 +17,13 @@ import android.widget.Button;
 
 import com.elzette.myplayerapp.Helpers.PermissionManager;
 import com.elzette.myplayerapp.R;
+import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.databinding.SongListFragmentBinding;
 import com.elzette.myplayerapp.musicRecyclerView.MusicAdapter;
 import com.elzette.myplayerapp.services.PlayerService;
 import com.elzette.myplayerapp.viewModels.SongListViewModel;
+
+import java.util.List;
 
 public class SongListFragment extends Fragment {
 
@@ -42,7 +45,6 @@ public class SongListFragment extends Fragment {
         viewModel = ViewModelProviders.of(this)
                                       .get(SongListViewModel.class);
 
-
         SongListFragmentBinding binding = //DataBindingUtil.inflate(inflater, R.layout.song_list_fragment, container, false);
                 SongListFragmentBinding.inflate(inflater);
         binding.setViewModel(viewModel);
@@ -57,7 +59,10 @@ public class SongListFragment extends Fragment {
 
         if(PermissionManager.requestReadExternalStoragePermission(this.getActivity())) {
             viewModel.getAllTracks();
-            ((HomeActivity)getActivity()).playAudio(viewModel.songsLiveData.getValue().get(0).getData());
+            List<Song> songs = viewModel.songsLiveData.getValue();
+
+            if(songs != null)
+            ((HomeActivity)getActivity()).playAudio(songs.get(0).getData());
         }
 //        viewModel.songs.observe(this, new Observer<List<Song>>() {
 //            @Override

@@ -3,6 +3,7 @@ package com.elzette.myplayerapp.viewModels;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Room;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -43,9 +44,9 @@ public class SongListViewModel extends AndroidViewModel {
         mSongDatabase = Room.databaseBuilder(app.getApplicationContext(), SongDatabase.class, DATABASE_NAME)
                             .allowMainThreadQueries()
                             .build();
-
+        songsLiveData = new MutableLiveData<>();
         getAllTracks();
-        songsLiveData = mSongDatabase.songDao().getAll();
+        //songsLiveData = mSongDatabase.songDao().getAll();
         }
 
     public void getAllTracks() {
@@ -63,7 +64,9 @@ public class SongListViewModel extends AndroidViewModel {
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
 
                 // Save to db
-                mSongDatabase.songDao().insert(new Song(data, title, album, artist));
+                Song songToAdd = new Song(data, title, album, artist);
+                mSongDatabase.songDao().insert(songToAdd);
+                songsLiveData.getValue().add(songToAdd);
             }
         }
         cursor.close();
