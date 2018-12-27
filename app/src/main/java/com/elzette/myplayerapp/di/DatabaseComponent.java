@@ -12,7 +12,9 @@ import dagger.Component;
 public interface DatabaseComponent {
 
     //SongDatabase getSongDatabase();
-    void injectDatabaseComponent(SongListViewModel vm);
+//    void injectDatabaseComponent(SongListViewModel vm);
+//
+//    void injectContextModule(SongListViewModel vm);
 
-    void injectContextModule(SongListViewModel vm);
+    void injectDatabaseComponent(SongListViewModel vm);
 }

@@ -14,41 +14,40 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.elzette.myplayerapp.App;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.dal.SongDatabase;
+import com.elzette.myplayerapp.di.ContextModule;
+import com.elzette.myplayerapp.di.DaggerDatabaseComponent;
+import com.elzette.myplayerapp.di.DatabaseComponent;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class SongListViewModel extends AndroidViewModel {
 
     private static final String TAG = SongListViewModel.class.getSimpleName();
     private static final String DATABASE_NAME = "song_database";
-    public ObservableArrayList<Song> songs;
 
     public ObservableField<String> sometext;
 
     private MutableLiveData<List<Song>> songsLiveData;
 
-    private SongDatabase mSongDatabase;
-
-    //@Inject
-    //SongDatabase database;
+    @Inject
+    SongDatabase mSongDatabase;
 
     public SongListViewModel(Application app) {
         super(app);
         Log.d(TAG, "begin constructor");
         sometext = new ObservableField<>("some text");
 
-        mSongDatabase = Room.databaseBuilder(app.getApplicationContext(), SongDatabase.class, DATABASE_NAME)
-                            .allowMainThreadQueries()
-                            .build();
+        ((App)getApplication()).component.injectDatabaseComponent(this);
 
-        songs = new ObservableArrayList<>();
         getAllTracks();
-        //songsLiveData = mSongDatabase.songDao().getAll();
-        }
+    }
 
     public MutableLiveData<List<Song>> getSongsLiveData() {
         if (songsLiveData == null) {

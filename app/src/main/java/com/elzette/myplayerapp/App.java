@@ -15,15 +15,17 @@ public class App extends Application {
 
     //private SongDatabase database;
 
+    public DatabaseComponent component;
+
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
         //mDatabase = DatabaseProvider.getInstance(getApplicationContext()).getDatabase();
-//        DatabaseComponent component = DaggerDatabaseComponent.builder()
-//                                                             .contextModule(new ContextModule(this))
-//                                                             .databaseModule(new DatabaseModule())
-//                                                             .build();
+        component = DaggerDatabaseComponent.builder()
+                        .contextModule(new ContextModule(this))
+                        .databaseModule(new DatabaseModule())
+                        .build();
         //database = component.getSongDatabase();
         //Log.d(TAG, "batat: " + database);
 
