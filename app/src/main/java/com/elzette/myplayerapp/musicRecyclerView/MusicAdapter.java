@@ -9,20 +9,21 @@ import android.view.ViewGroup;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.databinding.SongItemBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder> {
 
-    private List<Song> items;
+    private List<Song> items = new ArrayList<>();
     private int mLayoutId;
 
     public void setData(List<Song> data) {
         items.addAll(data);
+        notifyDataSetChanged();
     }
 
-    public MusicAdapter(List<Song> songs, int layoutId)
+    public MusicAdapter(int layoutId)
     {
-        this.items = songs;
         mLayoutId = layoutId;
     }
 

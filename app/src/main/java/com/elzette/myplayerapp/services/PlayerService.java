@@ -1,14 +1,24 @@
 package com.elzette.myplayerapp.services;
 
+import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import com.elzette.myplayerapp.R;
+import com.elzette.myplayerapp.ui.HomeActivity;
 
 import java.io.IOException;
 
@@ -19,6 +29,8 @@ public class PlayerService extends Service
                                    MediaPlayer.OnSeekCompleteListener,
                                    MediaPlayer.OnBufferingUpdateListener,
                                    AudioManager.OnAudioFocusChangeListener {
+
+    private static final int NOTIFICATION_ID = 99;
 
     private MediaPlayer mediaPlayer;
     private String mediaFilePath;
@@ -95,7 +107,28 @@ public class PlayerService extends Service
         if (mediaFilePath != null && mediaFilePath != "")
             initMediaPlayer();
 
+        runAsForeground();
+
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void runAsForeground() {
+        String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+        String channelName = "My Background Service";
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.createNotificationChannel(chan);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle("App is running in background")
+                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .build();
+
+        startForeground(NOTIFICATION_ID, notification);
+
     }
 
     @Override

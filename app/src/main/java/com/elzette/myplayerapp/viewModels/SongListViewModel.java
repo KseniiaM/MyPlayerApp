@@ -25,11 +25,11 @@ public class SongListViewModel extends AndroidViewModel {
 
     private static final String TAG = SongListViewModel.class.getSimpleName();
     private static final String DATABASE_NAME = "song_database";
-    //public ObservableArrayList<Song> songs;
+    public ObservableArrayList<Song> songs;
 
     public ObservableField<String> sometext;
 
-    public LiveData<List<Song>> songsLiveData;
+    private MutableLiveData<List<Song>> songsLiveData;
 
     private SongDatabase mSongDatabase;
 
@@ -44,17 +44,25 @@ public class SongListViewModel extends AndroidViewModel {
         mSongDatabase = Room.databaseBuilder(app.getApplicationContext(), SongDatabase.class, DATABASE_NAME)
                             .allowMainThreadQueries()
                             .build();
-        songsLiveData = new MutableLiveData<>();
+
+        songs = new ObservableArrayList<>();
         getAllTracks();
         //songsLiveData = mSongDatabase.songDao().getAll();
         }
+
+    public MutableLiveData<List<Song>> getSongsLiveData() {
+        if (songsLiveData == null) {
+            songsLiveData = new MutableLiveData<List<Song>>();
+        }
+        return songsLiveData;
+    }
 
     public void getAllTracks() {
         // gets all tracks
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         ContentResolver cr = getApplication().getContentResolver();
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-        Cursor cursor = cr.query(uri, null, selection, null, null );
+        Cursor cursor = cr.query(uri, null, null, null, null );
 
         if (cursor != null && cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
@@ -66,8 +74,18 @@ public class SongListViewModel extends AndroidViewModel {
                 // Save to db
                 Song songToAdd = new Song(data, title, album, artist);
                 mSongDatabase.songDao().insert(songToAdd);
-                songsLiveData.getValue().add(songToAdd);
+                //songsLiveData.getValue().add(songToAdd);
             }
+//            songsLiveData = mSongDatabase.songDao().getAll();
+            List<Song> songs;
+            songs = mSongDatabase.songDao().getAll();
+            getSongsLiveData().setValue(songs);
+        }
+        else {
+//            List<Song> songs = new ArrayList<Song>();
+//            List<Song> s = songsLiveData.getValue();
+//            s.addAll(songs);
+
         }
         cursor.close();
     }
