@@ -15,6 +15,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.elzette.myplayerapp.App;
+import com.elzette.myplayerapp.Helpers.PlayerProvider;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.dal.SongDatabase;
 import com.elzette.myplayerapp.di.ContextModule;
@@ -30,23 +31,17 @@ import javax.inject.Inject;
 public class SongListViewModel extends AndroidViewModel {
 
     private static final String TAG = SongListViewModel.class.getSimpleName();
-    private static final String DATABASE_NAME = "song_database";
-
-    public ObservableField<String> sometext;
 
     private MutableLiveData<List<Song>> songsLiveData;
 
     @Inject
-    SongDatabase mSongDatabase;
+    PlayerProvider playerProvider;
 
     public SongListViewModel(Application app) {
         super(app);
-        Log.d(TAG, "begin constructor");
-        sometext = new ObservableField<>("some text");
 
-        ((App)getApplication()).component.injectDatabaseComponent(this);
-
-        getAllTracks();
+        ((App)app).playerComponent.injectPlayerProviderComponent(this);
+        getSongsLiveData().setValue(playerProvider.getSongs());
     }
 
     public MutableLiveData<List<Song>> getSongsLiveData() {
@@ -54,54 +49,5 @@ public class SongListViewModel extends AndroidViewModel {
             songsLiveData = new MutableLiveData<List<Song>>();
         }
         return songsLiveData;
-    }
-
-    public void getAllTracks() {
-        // gets all tracks
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        ContentResolver cr = getApplication().getContentResolver();
-        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-        Cursor cursor = cr.query(uri, null, null, null, null );
-
-        if (cursor != null && cursor.getCount() > 0) {
-            while (cursor.moveToNext()) {
-                String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-
-                // Save to db
-                Song songToAdd = new Song(data, title, album, artist);
-                mSongDatabase.songDao().insert(songToAdd);
-                //songsLiveData.getValue().add(songToAdd);
-            }
-//            songsLiveData = mSongDatabase.songDao().getAll();
-            List<Song> songs;
-            songs = mSongDatabase.songDao().getAll();
-            getSongsLiveData().setValue(songs);
-        }
-        else {
-//            List<Song> songs = new ArrayList<Song>();
-//            List<Song> s = songsLiveData.getValue();
-//            s.addAll(songs);
-
-        }
-        cursor.close();
-    }
-
-//        mModel = new SongListModel();
-//
-//        mSongDatabase = mModel.getDatabaseInstance();
-//          mSongDatabase = Da
-//        SongDao dao = database.songDao();
-//        database.songDao().insert(new Song("hi", "hello", "papagena", "aha"));
-//        //songsLiveData = database.songDao().getAll();
-
-
-
-    public void addSong() {
-        sometext.set("some new text");
-//        songs.add(new Song("Red Hot chilly peppers", "snow"));
-//        songs.set(songs.size()-1, new Song("Red Hot chilly peppers", "snow"));
     }
 }

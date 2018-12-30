@@ -1,7 +1,6 @@
 package com.elzette.myplayerapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,9 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
-import com.elzette.myplayerapp.Helpers.PermissionManager;
 import com.elzette.myplayerapp.R;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.databinding.SongListFragmentBinding;
@@ -33,15 +30,10 @@ public class SongListFragment extends Fragment {
 
     private SongListViewModel viewModel;
 
-    private Button mButton;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         SongListFragmentBinding binding = InitViewModel(inflater);
-//        initRecyclerView(container);
-//        mButton = binding.findViewById(R.id.button);
-
         return binding.getRoot();
     }
 
@@ -49,29 +41,11 @@ public class SongListFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if(PermissionManager.requestReadExternalStoragePermission(this.getActivity())) {
-            viewModel.getAllTracks();
+//        if(PermissionManager.requestReadExternalStoragePermission(this.getActivity())) {
             List<Song> songs = viewModel.getSongsLiveData().getValue();
-
-            if(songs != null)
-                ((HomeActivity)getActivity()).playAudio(songs.get(0).getData());
-        }
+        //}
         initRecyclerView(this.getView());
         initSongsObserver();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_READ_STORAGE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    viewModel.getAllTracks();
-                }
-            }
-
-            // other 'case' statements for other permssions
-        }
     }
 
     private SongListFragmentBinding InitViewModel(LayoutInflater inflater) {
@@ -97,8 +71,6 @@ public class SongListFragment extends Fragment {
 
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-        //viewModel.songs.add(new Song("Red Hot chilly peppers", "californiacation"));
 
         mAdapter = new MusicAdapter(R.layout.song_item);
         mRecyclerView.setAdapter(mAdapter);

@@ -13,14 +13,14 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:defaultNavHost="true"
-        app:layout_constraintBottom_toTopOf="@+id/song_status_fragment"
+        app:layout_constraintBottom_toTopOf="@+id/action_bar_fragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
     <fragment
-        android:id="@+id/song_status_fragment"
+        android:id="@+id/action_bar_fragment"
         android:name="com.elzette.myplayerapp.ui.ActionBarFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

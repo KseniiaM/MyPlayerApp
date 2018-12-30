@@ -1,24 +1,22 @@
 package com.elzette.myplayerapp.services;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.elzette.myplayerapp.Helpers.PlayerProvider;
 import com.elzette.myplayerapp.R;
-import com.elzette.myplayerapp.ui.HomeActivity;
 
 import java.io.IOException;
 
@@ -31,11 +29,23 @@ public class PlayerService extends Service
                                    AudioManager.OnAudioFocusChangeListener {
 
     private static final int NOTIFICATION_ID = 99;
+    String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+    String CHANNEL_NAME = "My Background Service";
 
     private MediaPlayer mediaPlayer;
     private String mediaFilePath;
     private int resumePosition;
     private AudioManager audioManager;
+
+    private BroadcastReceiver playNewAudioReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mediaFilePath = intent.getExtras().getString(PlayerProvider.SONG_DATA);
+            stopMedia();
+            mediaPlayer.reset();
+            initMediaPlayer();
+        }
+    };
 
     private void initMediaPlayer() {
         mediaPlayer = new MediaPlayer();
@@ -59,34 +69,28 @@ public class PlayerService extends Service
         mediaPlayer.prepareAsync();
     }
 
-    private void playMedia() {
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.start();
-        }
-    }
-
-    private void stopMedia() {
-        if (mediaPlayer == null) return;
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-        }
-    }
-
-    private void pauseMedia() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            resumePosition = mediaPlayer.getCurrentPosition();
-        }
-    }
-
-    private void resumeMedia() {
+    public void playMedia() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(resumePosition);
             mediaPlayer.start();
         }
     }
 
-    // Binder given to clients
+    public void stopMedia() {
+        if (mediaPlayer == null) return;
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            resumePosition = 0;
+        }
+    }
+
+    public void pauseMedia() {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            resumePosition = mediaPlayer.getCurrentPosition();
+        }
+    }
+
     private final IBinder iBinder = new LocalBinder();
 
     @Override
@@ -98,9 +102,10 @@ public class PlayerService extends Service
             stopSelf();
         }
 
-        //Request audio focus
+        IntentFilter filter = new IntentFilter(PlayerProvider.PLAY_NEW_SONG);
+        registerReceiver(playNewAudioReceiver, filter);
+
         if (requestAudioFocus() == false) {
-            //Could not gain focus
             stopSelf();
         }
 
@@ -113,9 +118,7 @@ public class PlayerService extends Service
     }
 
     private void runAsForeground() {
-        String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
-        String channelName = "My Background Service";
-        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.createNotificationChannel(chan);
 
@@ -180,8 +183,12 @@ public class PlayerService extends Service
             stopMedia();
             mediaPlayer.release();
         }
+
+        if(playNewAudioReceiver != null)
+            unregisterReceiver(playNewAudioReceiver);
         removeAudioFocus();
     }
+
 
     public class LocalBinder extends Binder {
         public PlayerService getService() {

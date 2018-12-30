@@ -24,7 +24,8 @@
             </intent-filter>
         </activity>
         <service android:name=".services.PlayerService"
-                 android:exported="false"/>
+                 android:exported="false"
+                 android:stopWithTask="true"/>
     </application>
 
 </manifest>

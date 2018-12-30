@@ -1,42 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/blackColor">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ImageButton
-        android:id="@+id/cycle"
-        android:layout_width="100dp"
+    <data>
+        <variable
+            name="actionBarFragment"
+            type="com.elzette.myplayerapp.ui.ActionBarFragment" />
+
+        <variable
+            name="viewModel"
+            type="com.elzette.myplayerapp.viewModels.ActionBarViewModel" />
+
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/play"/>
+        android:background="@color/greyBackgroundColor"
+        android:elevation="4dp"
+        android:translationZ="8dp"
+        android:padding="10dp">
 
-    <ImageButton
-        android:id="@+id/prev"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/play"/>
+        <ImageButton
+            android:id="@+id/cycle"
+            android:src="@drawable/repeat"
+            app:layout_constraintEnd_toStartOf="@+id/prev"
+            app:layout_constraintStart_toStartOf="parent"
+            style="@style/ActionBarButtonStyle"/>
 
-    <ImageButton
-        android:id="@+id/play"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/play"/>
+        <ImageButton
+            android:id="@+id/prev"
+            android:src="@drawable/previous"
+            app:layout_constraintEnd_toStartOf="@+id/play"
+            app:layout_constraintStart_toEndOf="@+id/cycle"
+            style="@style/ActionBarButtonStyle"
+            android:onClick="@{() -> viewModel.onPrevClick()}"/>
 
-    <ImageButton
-        android:id="@+id/next"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/play"/>
+        <ImageButton
+            android:id="@+id/play"
+            android:src="@{viewModel.isPlaying ? @drawable/pause : @drawable/play}"
+            app:layout_constraintEnd_toStartOf="@+id/next"
+            app:layout_constraintStart_toEndOf="@+id/prev"
+            style="@style/ActionBarButtonStyle"
+            android:onClick="@{() -> viewModel.isPlaying ? viewModel.onPauseClick() : viewModel.onPlayClick()}"/>
 
-    <ImageButton
-        android:id="@+id/shuffle"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/play"/>
+        <ImageButton
+            android:id="@+id/next"
+            android:src="@drawable/next"
+            app:layout_constraintEnd_toStartOf="@+id/shuffle"
+            app:layout_constraintStart_toEndOf="@+id/play"
+            style="@style/ActionBarButtonStyle"
+            android:onClick="@{() -> viewModel.onNextClick()}"/>
 
-</android.support.constraint.ConstraintLayout>
+        <ImageButton
+            android:id="@+id/shuffle"
+            android:src="@drawable/shuffle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/next"
+            style="@style/ActionBarButtonStyle"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>
