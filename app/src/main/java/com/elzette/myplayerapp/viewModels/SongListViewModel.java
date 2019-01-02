@@ -50,4 +50,8 @@ public class SongListViewModel extends AndroidViewModel {
         }
         return songsLiveData;
     }
+
+    public void choseSongToPlay(int position) {
+        playerProvider.playSelectedSong(position);
+    }
 }

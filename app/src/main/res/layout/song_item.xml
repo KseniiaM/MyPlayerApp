@@ -10,18 +10,34 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
 
-        <TextView
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{Song.artist}" />
+            android:scaleType="centerInside"
+            android:src="@drawable/treble_key"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{Song.title}" />
+            android:orientation="vertical">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/artist_font_size"
+                android:textColor="@color/darkGrayMainTextColor"
+                android:text="@{Song.artist}" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/title_font_size"
+                android:textColor="@color/darkGrayAdditionalTextColor"
+                android:text="@{Song.title}" />
+
+        </LinearLayout>
     </LinearLayout>
-
 </layout>

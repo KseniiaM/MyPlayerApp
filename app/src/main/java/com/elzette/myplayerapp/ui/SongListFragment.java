@@ -73,6 +73,10 @@ public class SongListFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new MusicAdapter(R.layout.song_item);
+        mAdapter.onClickListener = (v, position) -> {
+            viewModel.choseSongToPlay(position);
+        };
+
         mRecyclerView.setAdapter(mAdapter);
     }
 }

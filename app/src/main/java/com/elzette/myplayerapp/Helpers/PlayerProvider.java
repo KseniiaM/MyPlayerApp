@@ -86,6 +86,13 @@ public class PlayerProvider {
         context.get().sendBroadcast(broadcastIntent);
     }
 
+    public void playSelectedSong(int index) {
+        if (index > 0 && index < songsLiveData.size()) {
+            currentSongIndex = index;
+            playNewSong();
+        }
+    }
+
     private void startPlayerService() {
         Intent playerIntent = new Intent(context.get(), PlayerService.class);
         Song currentSong = songsLiveData.get(currentSongIndex);
