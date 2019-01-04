@@ -26,11 +26,6 @@ public class ActionBarFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        HomeViewModel homeVm = ViewModelProviders.of(getActivity()).get(HomeViewModel.class);
-//        homeVm.getSongsLiveData().observe(this, (item) -> {
-//            //TODO make it call selected song
-//            viewModel.playSong(item.get(0));
-//        });
     }
 
     private void InitBinding(LayoutInflater inflater) {

@@ -17,8 +17,6 @@ public class MusicViewHolder extends RecyclerView.ViewHolder {
         this.binding = binding;
         binding.getRoot().setOnClickListener((view) -> {
             mListener.onClick(view, getAdapterPosition());
-            view.setElevation(8);
-            view.setTranslationZ(4);
         });
         mListener = listener;
     }

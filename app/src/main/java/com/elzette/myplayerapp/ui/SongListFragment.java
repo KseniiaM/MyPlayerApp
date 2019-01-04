@@ -42,7 +42,7 @@ public class SongListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
 //        if(PermissionManager.requestReadExternalStoragePermission(this.getActivity())) {
-            List<Song> songs = viewModel.getSongsLiveData().getValue();
+            List<Song> songs = viewModel.getSongsLiveData().getValue(); //DB shall be accessible from non-ui thread
         //}
         initRecyclerView(this.getView());
         initSongsObserver();

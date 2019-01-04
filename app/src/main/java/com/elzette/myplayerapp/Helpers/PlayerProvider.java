@@ -105,7 +105,7 @@ public class PlayerProvider {
         player.stopSelf();
     }
 
-    private void getAllTracks() {
+    private void getAllTracks() {       //To be moved out (suggest to have the initial scanning activity)
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         ContentResolver cr = context.get().getContentResolver();
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
@@ -135,6 +135,8 @@ public class PlayerProvider {
 //            s.addAll(songs);
 
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
     }
 }

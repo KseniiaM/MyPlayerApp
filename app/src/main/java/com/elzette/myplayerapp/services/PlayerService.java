@@ -20,7 +20,7 @@ import com.elzette.myplayerapp.R;
 
 import java.io.IOException;
 
-public class PlayerService extends Service
+public class PlayerService extends Service      //Service shall not handle player-related events. Please create a separate class for playback
                         implements MediaPlayer.OnCompletionListener,
                                    MediaPlayer.OnPreparedListener,
                                    MediaPlayer.OnErrorListener,
@@ -62,11 +62,13 @@ public class PlayerService extends Service
         try {
             // Set the data source to the mediaFile location
             mediaPlayer.setDataSource(mediaFilePath);
+            mediaPlayer.prepareAsync();
         } catch (IOException e) {
+            mediaPlayer.release();
+            mediaPlayer = null;
             e.printStackTrace();
             stopSelf();
         }
-        mediaPlayer.prepareAsync();
     }
 
     public void playMedia() {
@@ -105,11 +107,11 @@ public class PlayerService extends Service
         IntentFilter filter = new IntentFilter(PlayerProvider.PLAY_NEW_SONG);
         registerReceiver(playNewAudioReceiver, filter);
 
-        if (requestAudioFocus() == false) {
+        if (!requestAudioFocus()) {
             stopSelf();
         }
 
-        if (mediaFilePath != null && mediaFilePath != "")
+        if (mediaFilePath != null && !mediaFilePath.equals(""))
             initMediaPlayer();
 
         runAsForeground();
@@ -117,7 +119,7 @@ public class PlayerService extends Service
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void runAsForeground() {
+    private void runAsForeground() {        //Rich notification => controls
         NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.createNotificationChannel(chan);
