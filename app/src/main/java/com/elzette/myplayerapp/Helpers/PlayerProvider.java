@@ -50,7 +50,10 @@ public class PlayerProvider {
         this.context = new WeakReference<>(context);
         this.mSongDatabase = songDb;
 
-        getAllTracks();
+        if(PermissionManager.checkIfPermissionIsGranted())
+        {
+            getAllTracks();
+        }
     }
 
     public ObservableArrayList<Song> getSongs() {
@@ -97,6 +100,7 @@ public class PlayerProvider {
         Intent playerIntent = new Intent(context.get(), PlayerService.class);
         Song currentSong = songsLiveData.get(currentSongIndex);
         playerIntent.putExtra("media", currentSong.getData());
+        //needs to be both started and bound so music will play while the app is not active
         context.get().startService(playerIntent);
         context.get().bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }

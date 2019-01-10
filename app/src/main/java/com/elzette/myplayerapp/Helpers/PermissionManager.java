@@ -11,17 +11,26 @@ public class PermissionManager {
     private final static String TAG = PermissionManager.class.getSimpleName();
     private final static int MY_PERMISSIONS_REQUEST_READ_STORAGE = 111;
 
-    public static boolean requestReadExternalStoragePermission(Activity activity) {
+    private static boolean isPermissionGranted;
 
-        int isPermissionGranted = ContextCompat.checkSelfPermission(activity.getApplicationContext(),
+
+    public static void requestReadExternalStoragePermission(Activity activity) {
+
+        int permissionGranted = ContextCompat.checkSelfPermission(activity.getApplicationContext(),
                                                                     Manifest.permission.READ_EXTERNAL_STORAGE);
 
-        if (isPermissionGranted != PackageManager.PERMISSION_GRANTED) {
+        if (permissionGranted != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity,
                                               new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                                               MY_PERMISSIONS_REQUEST_READ_STORAGE);
-            return false;
+            isPermissionGranted = false;
         }
-        else return true;
+        else {
+            isPermissionGranted = true;
+        }
+    }
+
+    public static boolean checkIfPermissionIsGranted() {
+        return isPermissionGranted;
     }
 }
