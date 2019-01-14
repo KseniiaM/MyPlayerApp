@@ -15,7 +15,7 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.elzette.myplayerapp.Helpers.PlayerProvider;
+import com.elzette.myplayerapp.providers.PlayerProvider;
 import com.elzette.myplayerapp.R;
 
 import java.io.IOException;

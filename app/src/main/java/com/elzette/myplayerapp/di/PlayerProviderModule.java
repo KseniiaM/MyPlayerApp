@@ -2,7 +2,7 @@ package com.elzette.myplayerapp.di;
 
 import android.content.Context;
 
-import com.elzette.myplayerapp.Helpers.PlayerProvider;
+import com.elzette.myplayerapp.providers.PlayerProvider;
 import com.elzette.myplayerapp.dal.SongDatabase;
 
 import dagger.Module;

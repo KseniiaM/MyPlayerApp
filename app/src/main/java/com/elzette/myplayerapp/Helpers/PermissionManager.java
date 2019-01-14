@@ -9,12 +9,11 @@ import android.support.v4.content.ContextCompat;
 public class PermissionManager {
 
     private final static String TAG = PermissionManager.class.getSimpleName();
-    private final static int MY_PERMISSIONS_REQUEST_READ_STORAGE = 111;
+    public final static int REQUEST_READ_STORAGE_PERMISSION = 111;
 
-    private static boolean isPermissionGranted;
+    private static boolean mIsReadStoragePermissionGranted;
 
-
-    public static void requestReadExternalStoragePermission(Activity activity) {
+    public static boolean requestReadExternalStoragePermission(Activity activity) {
 
         int permissionGranted = ContextCompat.checkSelfPermission(activity.getApplicationContext(),
                                                                     Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -22,15 +21,19 @@ public class PermissionManager {
         if (permissionGranted != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity,
                                               new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                              MY_PERMISSIONS_REQUEST_READ_STORAGE);
-            isPermissionGranted = false;
+                                              REQUEST_READ_STORAGE_PERMISSION);
+            mIsReadStoragePermissionGranted = false;
         }
         else {
-            isPermissionGranted = true;
+            mIsReadStoragePermissionGranted = true;
         }
+
+        return mIsReadStoragePermissionGranted;
     }
 
-    public static boolean checkIfPermissionIsGranted() {
-        return isPermissionGranted;
+    public static boolean checkIfReadStoragePermissionIsGranted() {
+        return mIsReadStoragePermissionGranted;
     }
+
+    public static void setReadStoragePermission(boolean permissionResult) { mIsReadStoragePermissionGranted = permissionResult; }
 }

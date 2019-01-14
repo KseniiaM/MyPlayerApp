@@ -1,4 +1,4 @@
-package com.elzette.myplayerapp.Helpers;
+package com.elzette.myplayerapp.providers;
 
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -6,17 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
-import android.databinding.ObservableArrayList;
 import android.net.Uri;
 import android.os.IBinder;
 import android.provider.MediaStore;
 
+import com.elzette.myplayerapp.Helpers.PermissionManager;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.dal.SongDatabase;
 import com.elzette.myplayerapp.services.PlayerService;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 public class PlayerProvider {
 
@@ -29,7 +28,8 @@ public class PlayerProvider {
 
     boolean serviceBound = false;
 
-    private ObservableArrayList<Song> songsLiveData = new ObservableArrayList<>();
+    private ObservableArrayList<Song> songs = new ObservableArrayList<>();
+
     private int currentSongIndex;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -50,14 +50,14 @@ public class PlayerProvider {
         this.context = new WeakReference<>(context);
         this.mSongDatabase = songDb;
 
-        if(PermissionManager.checkIfPermissionIsGranted())
+        if(PermissionManager.checkIfReadStoragePermissionIsGranted())
         {
-            getAllTracks();
+            loadSongs();
         }
     }
 
     public ObservableArrayList<Song> getSongs() {
-        return songsLiveData;
+        return songs;
     }
 
     public void play() {
@@ -74,23 +74,23 @@ public class PlayerProvider {
     }
 
     public void playNextSong() {
-        currentSongIndex = currentSongIndex < (songsLiveData.size() - 1) ? currentSongIndex + 1 : 0;
+        currentSongIndex = currentSongIndex < (songs.size() - 1) ? currentSongIndex + 1 : 0;
         playNewSong();
     }
 
     public void playPrevSong() {
-        currentSongIndex = currentSongIndex == 0 ? songsLiveData.size() - 1 : currentSongIndex - 1;
+        currentSongIndex = currentSongIndex == 0 ? songs.size() - 1 : currentSongIndex - 1;
         playNewSong();
     }
 
     private void playNewSong() {
         Intent broadcastIntent = new Intent(PLAY_NEW_SONG);
-        broadcastIntent.putExtra(SONG_DATA, songsLiveData.get(currentSongIndex).getData());
+        broadcastIntent.putExtra(SONG_DATA, songs.get(currentSongIndex).getData());
         context.get().sendBroadcast(broadcastIntent);
     }
 
     public void playSelectedSong(int index) {
-        if (index > 0 && index < songsLiveData.size()) {
+        if (index > 0 && index < songs.size()) {
             currentSongIndex = index;
             playNewSong();
         }
@@ -98,7 +98,7 @@ public class PlayerProvider {
 
     private void startPlayerService() {
         Intent playerIntent = new Intent(context.get(), PlayerService.class);
-        Song currentSong = songsLiveData.get(currentSongIndex);
+        Song currentSong = songs.get(currentSongIndex);
         playerIntent.putExtra("media", currentSong.getData());
         //needs to be both started and bound so music will play while the app is not active
         context.get().startService(playerIntent);
@@ -109,7 +109,7 @@ public class PlayerProvider {
         player.stopSelf();
     }
 
-    private void getAllTracks() {       //To be moved out (suggest to have the initial scanning activity)
+    public void loadSongs() {       //To be moved out (suggest to have the initial scanning activity)
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         ContentResolver cr = context.get().getContentResolver();
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
@@ -128,9 +128,8 @@ public class PlayerProvider {
                 //songsLiveData.getValue().add(songToAdd);
             }
 //            songsLiveData = mSongDatabase.songDao().getAll();
-            List<Song> songs;
-            songs = mSongDatabase.songDao().getAll();
-            songsLiveData.addAll(songs);
+            songs.addAll(mSongDatabase.songDao().getAll());
+//            songsUpdated(songs);
             currentSongIndex = 0;
         }
         else {

@@ -2,33 +2,18 @@ package com.elzette.myplayerapp.viewModels;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.persistence.room.Room;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.database.Cursor;
-import android.databinding.ObservableArrayList;
-import android.databinding.ObservableField;
-import android.net.Uri;
-import android.provider.MediaStore;
-import android.util.Log;
 
 import com.elzette.myplayerapp.App;
-import com.elzette.myplayerapp.Helpers.PlayerProvider;
+import com.elzette.myplayerapp.providers.PlayerProvider;
 import com.elzette.myplayerapp.dal.Song;
-import com.elzette.myplayerapp.dal.SongDatabase;
-import com.elzette.myplayerapp.di.ContextModule;
-import com.elzette.myplayerapp.di.DaggerDatabaseComponent;
-import com.elzette.myplayerapp.di.DatabaseComponent;
+import com.elzette.myplayerapp.providers.UpdateCollectionCallback;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-public class SongListViewModel extends AndroidViewModel {
+public class SongListViewModel extends AndroidViewModel implements UpdateCollectionCallback {
 
     private static final String TAG = SongListViewModel.class.getSimpleName();
 
@@ -39,8 +24,8 @@ public class SongListViewModel extends AndroidViewModel {
 
     public SongListViewModel(Application app) {
         super(app);
-
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
+        playerProvider.getSongs().setCollectionUpdateSubscribers(this);
         getSongsLiveData().setValue(playerProvider.getSongs());
     }
 
@@ -53,5 +38,10 @@ public class SongListViewModel extends AndroidViewModel {
 
     public void choseSongToPlay(int position) {
         playerProvider.playSelectedSong(position);
+    }
+
+    @Override
+    public void onCollectionUpdated(List collection) {
+        songsLiveData.setValue(collection);
     }
 }
