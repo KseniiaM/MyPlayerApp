@@ -26,7 +26,7 @@ public class SongListViewModel extends AndroidViewModel implements UpdateCollect
         super(app);
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
         playerProvider.getSongs().setCollectionUpdateSubscribers(this);
-        getSongsLiveData().setValue(playerProvider.getSongs());
+        getSongsLiveData().setValue(playerProvider.getSongs().getValue());
     }
 
     public MutableLiveData<List<Song>> getSongsLiveData() {

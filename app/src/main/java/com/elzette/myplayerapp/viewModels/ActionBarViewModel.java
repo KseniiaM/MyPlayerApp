@@ -5,15 +5,17 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.databinding.ObservableBoolean;
 
 import com.elzette.myplayerapp.App;
-import com.elzette.myplayerapp.providers.IsMusicEmptyCallback;
 import com.elzette.myplayerapp.providers.PlayerProvider;
+import com.elzette.myplayerapp.providers.UpdateCollectionCallback;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
-public class ActionBarViewModel extends AndroidViewModel implements IsMusicEmptyCallback {
+public class ActionBarViewModel extends AndroidViewModel implements UpdateCollectionCallback {
 
     public ObservableBoolean isPlaying = new ObservableBoolean(false);
-    public boolean canPlayMusic = true;
+    public boolean canPlayMusic = false;
 
     @Inject
     PlayerProvider playerProvider;
@@ -21,7 +23,7 @@ public class ActionBarViewModel extends AndroidViewModel implements IsMusicEmpty
     public ActionBarViewModel(Application app) {
         super(app);
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
-        playerProvider.getSongs().setCollectionEmptySubscribers(this);
+        playerProvider.getSongs().setCollectionUpdateSubscribers(this);
     }
 
     public void onPlayClick() {
@@ -43,7 +45,7 @@ public class ActionBarViewModel extends AndroidViewModel implements IsMusicEmpty
     }
 
     @Override
-    public void isMusicCollectionEmptyChanged(boolean isEmpty) {
-        canPlayMusic = !isEmpty;
+    public void onCollectionUpdated(List collection) {
+        canPlayMusic = !(collection == null || collection.isEmpty());
     }
 }

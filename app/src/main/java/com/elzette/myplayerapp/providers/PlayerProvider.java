@@ -28,7 +28,7 @@ public class PlayerProvider {
 
     boolean serviceBound = false;
 
-    private ObservableArrayList<Song> songs = new ObservableArrayList<>();
+    private ObserverArrayList<Song> songs = new ObserverArrayList<>();
 
     private int currentSongIndex;
 
@@ -56,7 +56,7 @@ public class PlayerProvider {
         }
     }
 
-    public ObservableArrayList<Song> getSongs() {
+    public ObserverArrayList<Song> getSongs() {
         return songs;
     }
 
@@ -74,23 +74,23 @@ public class PlayerProvider {
     }
 
     public void playNextSong() {
-        currentSongIndex = currentSongIndex < (songs.size() - 1) ? currentSongIndex + 1 : 0;
+        currentSongIndex = currentSongIndex < (songs.getValue().size() - 1) ? currentSongIndex + 1 : 0;
         playNewSong();
     }
 
     public void playPrevSong() {
-        currentSongIndex = currentSongIndex == 0 ? songs.size() - 1 : currentSongIndex - 1;
+        currentSongIndex = currentSongIndex == 0 ? songs.getValue().size() - 1 : currentSongIndex - 1;
         playNewSong();
     }
 
     private void playNewSong() {
         Intent broadcastIntent = new Intent(PLAY_NEW_SONG);
-        broadcastIntent.putExtra(SONG_DATA, songs.get(currentSongIndex).getData());
+        broadcastIntent.putExtra(SONG_DATA, songs.getValue().get(currentSongIndex).getData());
         context.get().sendBroadcast(broadcastIntent);
     }
 
     public void playSelectedSong(int index) {
-        if (index > 0 && index < songs.size()) {
+        if (index > 0 && index < songs.getValue().size()) {
             currentSongIndex = index;
             playNewSong();
         }
@@ -98,7 +98,7 @@ public class PlayerProvider {
 
     private void startPlayerService() {
         Intent playerIntent = new Intent(context.get(), PlayerService.class);
-        Song currentSong = songs.get(currentSongIndex);
+        Song currentSong = songs.getValue().get(currentSongIndex);
         playerIntent.putExtra("media", currentSong.getData());
         //needs to be both started and bound so music will play while the app is not active
         context.get().startService(playerIntent);
@@ -110,7 +110,7 @@ public class PlayerProvider {
     }
 
     public void loadSongs() {       //To be moved out (suggest to have the initial scanning activity)
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Uri uri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
         ContentResolver cr = context.get().getContentResolver();
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         Cursor cursor = cr.query(uri, null, null, null, null );
@@ -128,7 +128,7 @@ public class PlayerProvider {
                 //songsLiveData.getValue().add(songToAdd);
             }
 //            songsLiveData = mSongDatabase.songDao().getAll();
-            songs.addAll(mSongDatabase.songDao().getAll());
+            songs.getValue().addAll(mSongDatabase.songDao().getAll());
 //            songsUpdated(songs);
             currentSongIndex = 0;
         }
