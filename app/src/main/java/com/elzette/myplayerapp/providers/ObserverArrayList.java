@@ -3,6 +3,8 @@ package com.elzette.myplayerapp.providers;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableList;
 
+import com.elzette.myplayerapp.callbacks.UpdateCollectionCallback;
+
 import java.util.ArrayList;
 import java.util.List;
 

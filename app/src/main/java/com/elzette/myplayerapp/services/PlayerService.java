@@ -9,88 +9,65 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-
+import com.elzette.myplayerapp.providers.MediaPlayerProvider;
 import com.elzette.myplayerapp.providers.PlayerProvider;
 import com.elzette.myplayerapp.R;
 
-import java.io.IOException;
-
-public class PlayerService extends Service      //Service shall not handle player-related events. Please create a separate class for playback
-                        implements MediaPlayer.OnCompletionListener,
-                                   MediaPlayer.OnPreparedListener,
-                                   MediaPlayer.OnErrorListener,
-                                   MediaPlayer.OnSeekCompleteListener,
-                                   MediaPlayer.OnBufferingUpdateListener,
-                                   AudioManager.OnAudioFocusChangeListener {
+public class PlayerService extends Service {     //Service shall not handle player-related events. Please create a separate class for playback
+                        //implements AudioManager.OnAudioFocusChangeListener {
 
     private static final int NOTIFICATION_ID = 99;
     String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
     String CHANNEL_NAME = "My Background Service";
 
-    private MediaPlayer mediaPlayer;
+//    private MediaPlayer mediaPlayer;
+    private MediaPlayerProvider mediaPlayerProvider;
     private String mediaFilePath;
-    private int resumePosition;
+//    private int resumePosition;
     private AudioManager audioManager;
 
     private BroadcastReceiver playNewAudioReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mediaFilePath = intent.getExtras().getString(PlayerProvider.SONG_DATA);
-            stopMedia();
-            mediaPlayer.reset();
-            initMediaPlayer();
+            //stopMedia();
+            mediaPlayerProvider.startPlayer(mediaFilePath);
         }
     };
 
-    private void initMediaPlayer() {
-        mediaPlayer = new MediaPlayer();
-        //Set up MediaPlayer event listeners
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
-        //Reset so that the MediaPlayer is not pointing to another data source
-        mediaPlayer.reset();
-
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        try {
-            // Set the data source to the mediaFile location
-            mediaPlayer.setDataSource(mediaFilePath);
-            mediaPlayer.prepareAsync();
-        } catch (IOException e) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-            e.printStackTrace();
-            stopSelf();
-        }
-    }
+//    private void initMediaPlayer() {
+//        mediaPlayer = new MediaPlayer();
+//        //Set up MediaPlayer event listeners
+//        mediaPlayer.setOnCompletionListener(this);
+//        mediaPlayer.setOnErrorListener(this);
+//        mediaPlayer.setOnPreparedListener(this);
+//        mediaPlayer.setOnBufferingUpdateListener(this);
+//        mediaPlayer.setOnSeekCompleteListener(this);
+//        //Reset so that the MediaPlayer is not pointing to another data source
+//        mediaPlayer.reset();
+//
+//        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//        try {
+//            // Set the data source to the mediaFile location
+//            mediaPlayer.setDataSource(mediaFilePath);
+//            mediaPlayer.prepareAsync();
+//        } catch (IOException e) {
+//            mediaPlayer.release();
+//            mediaPlayer = null;
+//            e.printStackTrace();
+//            stopSelf();
+//        }
+//    }
 
     public void playMedia() {
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.seekTo(resumePosition);
-            mediaPlayer.start();
-        }
-    }
-
-    public void stopMedia() {
-        if (mediaPlayer == null) return;
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            resumePosition = 0;
-        }
+        mediaPlayerProvider.playMedia();
     }
 
     public void pauseMedia() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            resumePosition = mediaPlayer.getCurrentPosition();
-        }
+        mediaPlayerProvider.pauseMedia();
     }
 
     private final IBinder iBinder = new LocalBinder();
@@ -104,15 +81,17 @@ public class PlayerService extends Service      //Service shall not handle playe
             stopSelf();
         }
 
+        mediaPlayerProvider = new MediaPlayerProvider();
         IntentFilter filter = new IntentFilter(PlayerProvider.PLAY_NEW_SONG);
         registerReceiver(playNewAudioReceiver, filter);
 
-        if (!requestAudioFocus()) {
-            stopSelf();
-        }
+//        if (!requestAudioFocus()) {
+//            stopSelf();
+//        }
 
-        if (mediaFilePath != null && !mediaFilePath.equals(""))
-            initMediaPlayer();
+        if (mediaFilePath != null && !mediaFilePath.equals("")) {
+            mediaPlayerProvider.startPlayer(mediaFilePath);
+        }
 
         runAsForeground();
 
@@ -141,54 +120,51 @@ public class PlayerService extends Service      //Service shall not handle playe
         return iBinder;
     }
 
-    @Override
-    public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        //Invoked indicating buffering status of
-        //a media resource being streamed over the network.
-    }
+//    @Override
+//    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+//        //Invoked indicating buffering status of
+//        //a media resource being streamed over the network.
+//    }
 
-    public void onCompletion(MediaPlayer mp) {
-        stopMedia();
-        stopSelf();
-    }
+//    public void onCompletion(MediaPlayer mp) {
+//        stopMedia();
+//        stopSelf();
+//    }
 
-    //Handle errors
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        //Invoked when there has been an error during an asynchronous operation
-        switch (what) {
-            case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-                Log.d("MediaPlayer Error", "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK " + extra);
-                break;
-            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                Log.d("MediaPlayer Error", "MEDIA ERROR SERVER DIED " + extra);
-                break;
-            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                Log.d("MediaPlayer Error", "MEDIA ERROR UNKNOWN " + extra);
-                break;
-        }
-        return false;
-    }
+//    //Handle errors
+//    public boolean onError(MediaPlayer mp, int what, int extra) {
+//        //Invoked when there has been an error during an asynchronous operation
+//        switch (what) {
+//            case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
+//                Log.d("MediaPlayer Error", "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK " + extra);
+//                break;
+//            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+//                Log.d("MediaPlayer Error", "MEDIA ERROR SERVER DIED " + extra);
+//                break;
+//            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+//                Log.d("MediaPlayer Error", "MEDIA ERROR UNKNOWN " + extra);
+//                break;
+//        }
+//        return false;
+//    }
 
-    public void onPrepared(MediaPlayer mp) {
-        playMedia();
-    }
+//    public void onPrepared(MediaPlayer mp) {
+//        playMedia();
+//    }
 
-    @Override
-    public void onSeekComplete(MediaPlayer mp) {
-        //Invoked indicating the completion of a seek operation.
-    }
+//    @Override
+//    public void onSeekComplete(MediaPlayer mp) {
+//        //Invoked indicating the completion of a seek operation.
+//    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mediaPlayer != null) {
-            stopMedia();
-            mediaPlayer.release();
-        }
+        mediaPlayerProvider.destroyMediaPlayer();
 
         if(playNewAudioReceiver != null)
             unregisterReceiver(playNewAudioReceiver);
-        removeAudioFocus();
+        //removeAudioFocus();
     }
 
 
@@ -198,60 +174,60 @@ public class PlayerService extends Service      //Service shall not handle playe
         }
     }
 
-    @Override
-    public void onAudioFocusChange(int focusState) {
-        //Invoked when the audio focus of the system is updated.
-        switch (focusState) {
-            case AudioManager.AUDIOFOCUS_GAIN:
-                // resume playback
-                if (mediaPlayer == null) {
-                    initMediaPlayer();
-                }
-                else if (!mediaPlayer.isPlaying()) {
-                    mediaPlayer.start();
-                }
-                mediaPlayer.setVolume(1.0f, 1.0f);
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS:
-                // Lost focus for an unbounded amount of time: stop playback and release media player
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
-                mediaPlayer.release();
-                mediaPlayer = null;
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                // Lost focus for a short time, but we have to stop
-                // playback. We don't release the media player because playback
-                // is likely to resume
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
-                }
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                // Lost focus for a short time, but it's ok to keep playing
-                // at an attenuated level
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.setVolume(0.1f, 0.1f);
-                }
-                break;
-        }
-    }
-
-    private boolean requestAudioFocus() {
-        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            //Focus gained
-            return true;
-        }
-        //Could not gain focus
-        return false;
-    }
-
-    private boolean removeAudioFocus() {
-        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
-                audioManager.abandonAudioFocus(this);
-    }
+//    @Override
+//    public void onAudioFocusChange(int focusState) {
+//        //Invoked when the audio focus of the system is updated.
+//        switch (focusState) {
+//            case AudioManager.AUDIOFOCUS_GAIN:
+//                // resume playback
+//                if (mediaPlayer == null) {
+//                    initMediaPlayer();
+//                }
+//                else if (!mediaPlayer.isPlaying()) {
+//                    mediaPlayer.start();
+//                }
+//                mediaPlayer.setVolume(1.0f, 1.0f);
+//                break;
+//            case AudioManager.AUDIOFOCUS_LOSS:
+//                // Lost focus for an unbounded amount of time: stop playback and release media player
+//                if (mediaPlayer.isPlaying()) {
+//                    mediaPlayer.stop();
+//                }
+//                mediaPlayer.release();
+//                mediaPlayer = null;
+//                break;
+//            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+//                // Lost focus for a short time, but we have to stop
+//                // playback. We don't release the media player because playback
+//                // is likely to resume
+//                if (mediaPlayer.isPlaying()) {
+//                    mediaPlayer.pause();
+//                }
+//                break;
+//            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+//                // Lost focus for a short time, but it's ok to keep playing
+//                // at an attenuated level
+//                if (mediaPlayer.isPlaying()) {
+//                    mediaPlayer.setVolume(0.1f, 0.1f);
+//                }
+//                break;
+//        }
+//    }
+//
+//    private boolean requestAudioFocus() {
+//        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//        int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+//        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+//            //Focus gained
+//            return true;
+//        }
+//        //Could not gain focus
+//        return false;
+//    }
+//
+//    private boolean removeAudioFocus() {
+//        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
+//                audioManager.abandonAudioFocus(this);
+//    }
 
 }

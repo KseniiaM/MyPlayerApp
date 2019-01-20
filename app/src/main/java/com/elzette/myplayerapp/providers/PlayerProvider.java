@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 
 import com.elzette.myplayerapp.Helpers.PermissionManager;
+import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.dal.SongDatabase;
 import com.elzette.myplayerapp.services.PlayerService;
@@ -29,6 +30,7 @@ public class PlayerProvider {
     boolean serviceBound = false;
 
     private ObserverArrayList<Song> songs = new ObserverArrayList<>();
+    public IsMusicPlayingCallback isMusicPlayingCallback;
 
     private int currentSongIndex;
 
@@ -67,10 +69,12 @@ public class PlayerProvider {
         else {
             player.playMedia();
         }
+        isMusicPlayingCallback.isMusicPlaying(true);
     }
 
     public void pause() {
         player.pauseMedia();
+        isMusicPlayingCallback.isMusicPlaying(false);
     }
 
     public void playNextSong() {
@@ -87,6 +91,7 @@ public class PlayerProvider {
         Intent broadcastIntent = new Intent(PLAY_NEW_SONG);
         broadcastIntent.putExtra(SONG_DATA, songs.getValue().get(currentSongIndex).getData());
         context.get().sendBroadcast(broadcastIntent);
+        isMusicPlayingCallback.isMusicPlaying(true);
     }
 
     public void playSelectedSong(int index) {
@@ -110,7 +115,7 @@ public class PlayerProvider {
     }
 
     public void loadSongs() {       //To be moved out (suggest to have the initial scanning activity)
-        Uri uri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         ContentResolver cr = context.get().getContentResolver();
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         Cursor cursor = cr.query(uri, null, null, null, null );

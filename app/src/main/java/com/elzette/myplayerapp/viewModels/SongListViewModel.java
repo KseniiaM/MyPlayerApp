@@ -7,7 +7,7 @@ import android.arch.lifecycle.MutableLiveData;
 import com.elzette.myplayerapp.App;
 import com.elzette.myplayerapp.providers.PlayerProvider;
 import com.elzette.myplayerapp.dal.Song;
-import com.elzette.myplayerapp.providers.UpdateCollectionCallback;
+import com.elzette.myplayerapp.callbacks.UpdateCollectionCallback;
 
 import java.util.List;
 
