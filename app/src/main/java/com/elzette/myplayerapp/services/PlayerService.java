@@ -1,66 +1,35 @@
 package com.elzette.myplayerapp.services;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.AudioManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
+
+import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.providers.MediaPlayerProvider;
-import com.elzette.myplayerapp.providers.PlayerProvider;
-import com.elzette.myplayerapp.R;
+import com.elzette.myplayerapp.providers.NotificationProvider;
+import com.elzette.myplayerapp.providers.PlayerManager;
 
-public class PlayerService extends Service {     //Service shall not handle player-related events. Please create a separate class for playback
-                        //implements AudioManager.OnAudioFocusChangeListener {
+public class PlayerService extends Service {
 
-    private static final int NOTIFICATION_ID = 99;
-    String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
-    String CHANNEL_NAME = "My Background Service";
+    //TODO create a separate notification manager
+    public static final String AUDIO_FILE_DATA = "audio_file_data";
 
-//    private MediaPlayer mediaPlayer;
     private MediaPlayerProvider mediaPlayerProvider;
     private String mediaFilePath;
-//    private int resumePosition;
-    private AudioManager audioManager;
 
     private BroadcastReceiver playNewAudioReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mediaFilePath = intent.getExtras().getString(PlayerProvider.SONG_DATA);
-            //stopMedia();
+            mediaFilePath = intent.getExtras().getString(PlayerManager.SONG_DATA);
             mediaPlayerProvider.startPlayer(mediaFilePath);
         }
     };
-
-//    private void initMediaPlayer() {
-//        mediaPlayer = new MediaPlayer();
-//        //Set up MediaPlayer event listeners
-//        mediaPlayer.setOnCompletionListener(this);
-//        mediaPlayer.setOnErrorListener(this);
-//        mediaPlayer.setOnPreparedListener(this);
-//        mediaPlayer.setOnBufferingUpdateListener(this);
-//        mediaPlayer.setOnSeekCompleteListener(this);
-//        //Reset so that the MediaPlayer is not pointing to another data source
-//        mediaPlayer.reset();
-//
-//        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//        try {
-//            // Set the data source to the mediaFile location
-//            mediaPlayer.setDataSource(mediaFilePath);
-//            mediaPlayer.prepareAsync();
-//        } catch (IOException e) {
-//            mediaPlayer.release();
-//            mediaPlayer = null;
-//            e.printStackTrace();
-//            stopSelf();
-//        }
-//    }
 
     public void playMedia() {
         mediaPlayerProvider.playMedia();
@@ -76,18 +45,14 @@ public class PlayerService extends Service {     //Service shall not handle play
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
             //An audio file is passed to the service through putExtra();
-            mediaFilePath = intent.getExtras().getString("media");
+            mediaFilePath = intent.getExtras().getString(AUDIO_FILE_DATA);
         } catch (NullPointerException e) {
             stopSelf();
         }
 
         mediaPlayerProvider = new MediaPlayerProvider();
-        IntentFilter filter = new IntentFilter(PlayerProvider.PLAY_NEW_SONG);
+        IntentFilter filter = new IntentFilter(PlayerManager.PLAY_NEW_SONG);
         registerReceiver(playNewAudioReceiver, filter);
-
-//        if (!requestAudioFocus()) {
-//            stopSelf();
-//        }
 
         if (mediaFilePath != null && !mediaFilePath.equals("")) {
             mediaPlayerProvider.startPlayer(mediaFilePath);
@@ -98,64 +63,16 @@ public class PlayerService extends Service {     //Service shall not handle play
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void runAsForeground() {        //Rich notification => controls
-        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.createNotificationChannel(chan);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
-        Notification notification = notificationBuilder.setOngoing(true)
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentTitle("App is running in background")
-                .setPriority(NotificationManager.IMPORTANCE_MIN)
-                .setCategory(Notification.CATEGORY_SERVICE)
-                .build();
-
-        startForeground(NOTIFICATION_ID, notification);
-
+    private void runAsForeground() {
+        NotificationProvider notificationProvider = new NotificationProvider();
+        Notification notification = notificationProvider.createNotification(this, new Song("batat", "batatovich","","ivy"));
+        startForeground(NotificationProvider.NOTIFICATION_ID, notification);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return iBinder;
     }
-
-//    @Override
-//    public void onBufferingUpdate(MediaPlayer mp, int percent) {
-//        //Invoked indicating buffering status of
-//        //a media resource being streamed over the network.
-//    }
-
-//    public void onCompletion(MediaPlayer mp) {
-//        stopMedia();
-//        stopSelf();
-//    }
-
-//    //Handle errors
-//    public boolean onError(MediaPlayer mp, int what, int extra) {
-//        //Invoked when there has been an error during an asynchronous operation
-//        switch (what) {
-//            case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-//                Log.d("MediaPlayer Error", "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK " + extra);
-//                break;
-//            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-//                Log.d("MediaPlayer Error", "MEDIA ERROR SERVER DIED " + extra);
-//                break;
-//            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-//                Log.d("MediaPlayer Error", "MEDIA ERROR UNKNOWN " + extra);
-//                break;
-//        }
-//        return false;
-//    }
-
-//    public void onPrepared(MediaPlayer mp) {
-//        playMedia();
-//    }
-
-//    @Override
-//    public void onSeekComplete(MediaPlayer mp) {
-//        //Invoked indicating the completion of a seek operation.
-//    }
 
     @Override
     public void onDestroy() {
@@ -164,7 +81,6 @@ public class PlayerService extends Service {     //Service shall not handle play
 
         if(playNewAudioReceiver != null)
             unregisterReceiver(playNewAudioReceiver);
-        //removeAudioFocus();
     }
 
 
@@ -174,60 +90,25 @@ public class PlayerService extends Service {     //Service shall not handle play
         }
     }
 
-//    @Override
-//    public void onAudioFocusChange(int focusState) {
-//        //Invoked when the audio focus of the system is updated.
-//        switch (focusState) {
-//            case AudioManager.AUDIOFOCUS_GAIN:
-//                // resume playback
-//                if (mediaPlayer == null) {
-//                    initMediaPlayer();
-//                }
-//                else if (!mediaPlayer.isPlaying()) {
-//                    mediaPlayer.start();
-//                }
-//                mediaPlayer.setVolume(1.0f, 1.0f);
-//                break;
-//            case AudioManager.AUDIOFOCUS_LOSS:
-//                // Lost focus for an unbounded amount of time: stop playback and release media player
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.stop();
-//                }
-//                mediaPlayer.release();
-//                mediaPlayer = null;
-//                break;
-//            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-//                // Lost focus for a short time, but we have to stop
-//                // playback. We don't release the media player because playback
-//                // is likely to resume
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.pause();
-//                }
-//                break;
-//            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-//                // Lost focus for a short time, but it's ok to keep playing
-//                // at an attenuated level
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.setVolume(0.1f, 0.1f);
-//                }
-//                break;
-//        }
-//    }
-//
-//    private boolean requestAudioFocus() {
-//        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-//        int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-//        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-//            //Focus gained
-//            return true;
-//        }
-//        //Could not gain focus
-//        return false;
-//    }
-//
-//    private boolean removeAudioFocus() {
-//        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
-//                audioManager.abandonAudioFocus(this);
-//    }
 
+    public class NotificationBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case "prev":
+                    Toast t = Toast.makeText(context, "prev", Toast.LENGTH_SHORT);
+                    t.show();
+                    break;
+                case "play":
+                    Toast t1 = Toast.makeText(context, "play", Toast.LENGTH_SHORT);
+                    t1.show();
+                    break;
+                case "next":
+                    Toast t2 = Toast.makeText(context, "next", Toast.LENGTH_SHORT);
+                    t2.show();
+                    break;
+            }
+        }
+    }
 }

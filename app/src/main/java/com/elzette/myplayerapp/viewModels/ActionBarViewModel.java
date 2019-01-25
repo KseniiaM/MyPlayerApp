@@ -6,7 +6,7 @@ import android.databinding.ObservableBoolean;
 
 import com.elzette.myplayerapp.App;
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
-import com.elzette.myplayerapp.providers.PlayerProvider;
+import com.elzette.myplayerapp.providers.PlayerManager;
 import com.elzette.myplayerapp.callbacks.UpdateCollectionCallback;
 
 import java.util.List;
@@ -19,29 +19,29 @@ public class ActionBarViewModel extends AndroidViewModel implements UpdateCollec
     public boolean canPlayMusic = false;
 
     @Inject
-    PlayerProvider playerProvider;
+    PlayerManager playerManager;
 
     public ActionBarViewModel(Application app) {
         super(app);
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
-        playerProvider.getSongs().setCollectionUpdateSubscribers(this);
-        playerProvider.isMusicPlayingCallback = this;
+        playerManager.getSongs().setCollectionUpdateSubscribers(this);
+        playerManager.setIsMusicPlayingCallback(this);
     }
 
     public void onPlayClick() {
-        playerProvider.play();
+        playerManager.play();
     }
 
     public void onPauseClick() {
-        playerProvider.pause();
+        playerManager.pause();
     }
 
     public void onNextClick() {
-        playerProvider.playNextSong();
+        playerManager.playNextSong();
     }
 
     public void onPrevClick() {
-        playerProvider.playPrevSong();
+        playerManager.playPrevSong();
     }
 
     @Override
@@ -50,7 +50,13 @@ public class ActionBarViewModel extends AndroidViewModel implements UpdateCollec
     }
 
     @Override
-    public void isMusicPlaying(boolean isPlaying) {
+    public void changeMusicPlaybackState(boolean isPlaying) {
         this.isPlaying.set(isPlaying);
+    }
+
+    @Override
+    protected void onCleared() {
+        playerManager.getSongs().removeFromCollectionUpdateSubscribers(this);
+        super.onCleared();
     }
 }

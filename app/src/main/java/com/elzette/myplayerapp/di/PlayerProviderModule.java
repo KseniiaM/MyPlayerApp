@@ -2,7 +2,7 @@ package com.elzette.myplayerapp.di;
 
 import android.content.Context;
 
-import com.elzette.myplayerapp.providers.PlayerProvider;
+import com.elzette.myplayerapp.providers.PlayerManager;
 import com.elzette.myplayerapp.dal.SongDatabase;
 
 import dagger.Module;
@@ -13,7 +13,7 @@ public class PlayerProviderModule {
 
     @Provides
     @DatabaseApplicationScope
-    public PlayerProvider getPlayerProvider(Context context, SongDatabase db) {
-        return new PlayerProvider(context, db);
+    public PlayerManager getPlayerProvider(Context context, SongDatabase db) {
+        return new PlayerManager(context, db);
     }
 }

@@ -1,6 +1,6 @@
 package com.elzette.myplayerapp.providers;
 
-import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.Log;
@@ -10,12 +10,10 @@ import java.io.IOException;
 public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
                                             MediaPlayer.OnPreparedListener,
                                             MediaPlayer.OnErrorListener,
-                                            MediaPlayer.OnSeekCompleteListener,
-                                            MediaPlayer.OnBufferingUpdateListener {
-                                            //AudioManager.OnAudioFocusChangeListener{
+                                            AudioManager.OnAudioFocusChangeListener{
 
     private MediaPlayer mediaPlayer;
-    private AudioManager audioManager;
+    //private AudioManager audioManager;
 
     private int resumePosition;
 
@@ -26,17 +24,16 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
     private void initMediaPlayer(String mediaFilePath) {
         if(mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
-
             mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.setOnErrorListener(this);
             mediaPlayer.setOnPreparedListener(this);
-            mediaPlayer.setOnBufferingUpdateListener(this);
-            mediaPlayer.setOnSeekCompleteListener(this);
         }
 
         mediaPlayer.reset();
+        resumePosition = 0;
         //TODO change this and not use deprecated method
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+        mediaPlayer.setAudioAttributes(getAttributes());
         try {
             // Set the data source to the mediaFile location
             mediaPlayer.setDataSource(mediaFilePath);
@@ -51,9 +48,6 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
     public void playMedia() {
         if (mediaPlayer == null) return;
 
-        stopMedia();
-
-        //the music is not properly stopped and resumes from another position
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(resumePosition);
             mediaPlayer.start();
@@ -86,7 +80,6 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
         //removeAudioFocus();
     }
 
-    //Handle errors
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         //Invoked when there has been an error during an asynchronous operation
@@ -105,17 +98,6 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
     }
 
     @Override
-    public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        //Invoked indicating buffering status of
-        //a media resource being streamed over the network.
-    }
-
-    @Override
-    public void onSeekComplete(MediaPlayer mp) {
-        //Invoked indicating the completion of a seek operation.
-    }
-
-    @Override
     public void onPrepared(MediaPlayer mp) {
         playMedia();
     }
@@ -125,6 +107,12 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
         stopMedia();
     }
 
+    private AudioAttributes getAttributes() {
+        return new AudioAttributes.Builder()
+                                  .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                  .setUsage(AudioAttributes.USAGE_MEDIA)
+                                  .build();
+    }
 //
 //    private boolean requestAudioFocus() {
 //        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -142,44 +130,43 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
 //                audioManager.abandonAudioFocus(this);
 //    }
 
-//    @Override
-//    public void onAudioFocusChange(int focusState) {
-//        //Invoked when the audio focus of the system is updated.
-//        switch (focusState) {
-//            case AudioManager.AUDIOFOCUS_GAIN:
-//                // resume playback
-//                if (mediaPlayer == null) {
-//                    initMediaPlayer();
-//                }
-//                else if (!mediaPlayer.isPlaying()) {
-//                    mediaPlayer.start();
-//                }
-//                mediaPlayer.setVolume(1.0f, 1.0f);
-//                break;
-//            case AudioManager.AUDIOFOCUS_LOSS:
-//                // Lost focus for an unbounded amount of time: stop playback and release media player
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.stop();
-//                }
-//                mediaPlayer.release();
-//                mediaPlayer = null;
-//                break;
-//            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-//                // Lost focus for a short time, but we have to stop
-//                // playback. We don't release the media player because playback
-//                // is likely to resume
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.pause();
-//                }
-//                break;
-//            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-//                // Lost focus for a short time, but it's ok to keep playing
-//                // at an attenuated level
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.setVolume(0.1f, 0.1f);
-//                }
-//                break;
-//        }
-//    }
-
+    @Override
+    public void onAudioFocusChange(int focusState) {
+        //Invoked when the audio focus of the system is updated.
+        switch (focusState) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                // resume playback
+                if (mediaPlayer == null) {
+                    initMediaPlayer("");
+                }
+                else if (!mediaPlayer.isPlaying()) {
+                    mediaPlayer.start();
+                }
+                mediaPlayer.setVolume(1.0f, 1.0f);
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                // Lost focus for an unbounded amount of time: stop playback and release media player
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+                mediaPlayer.release();
+                mediaPlayer = null;
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                // Lost focus for a short time, but we have to stop
+                // playback. We don't release the media player because playback
+                // is likely to resume
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // Lost focus for a short time, but it's ok to keep playing
+                // at an attenuated level
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.setVolume(0.1f, 0.1f);
+                }
+                break;
+        }
+    }
 }

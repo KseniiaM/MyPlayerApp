@@ -10,10 +10,8 @@ import java.util.List;
 
 public class ObserverArrayList<T> extends ObservableList.OnListChangedCallback<ObservableArrayList<T>> {// extends ArrayList<T> {
 
-    //TODO unsubscribe!
     private ObservableArrayList<T> collection;
     private List<UpdateCollectionCallback> collectionUpdateSubscribers;
-    //private List<IsMusicEmptyCallback> collectionEmptySubscribers;
 
     public ObserverArrayList() {
         collection = new ObservableArrayList<>();
@@ -74,6 +72,12 @@ public class ObserverArrayList<T> extends ObservableList.OnListChangedCallback<O
             collectionUpdateSubscribers = new ArrayList<>();
         }
         collectionUpdateSubscribers.add(callback);
+    }
+
+    public void removeFromCollectionUpdateSubscribers(UpdateCollectionCallback callback) {
+        if(collectionUpdateSubscribers != null) {
+            collectionUpdateSubscribers.remove(callback);
+        }
     }
 
     private boolean isCollectionEmpty() {

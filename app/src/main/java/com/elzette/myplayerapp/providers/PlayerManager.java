@@ -1,5 +1,6 @@
 package com.elzette.myplayerapp.providers;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.widget.Toast;
 
 import com.elzette.myplayerapp.Helpers.PermissionManager;
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
@@ -17,8 +19,10 @@ import com.elzette.myplayerapp.dal.SongDatabase;
 import com.elzette.myplayerapp.services.PlayerService;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PlayerProvider {
+public class PlayerManager {
 
     public static final String PLAY_NEW_SONG = "Play new song";
     public static final String SONG_DATA = "Song data";
@@ -30,7 +34,7 @@ public class PlayerProvider {
     boolean serviceBound = false;
 
     private ObserverArrayList<Song> songs = new ObserverArrayList<>();
-    public IsMusicPlayingCallback isMusicPlayingCallback;
+    private List<IsMusicPlayingCallback> isMusicPlayingCallbacks = new ArrayList<>();
 
     private int currentSongIndex;
 
@@ -48,7 +52,7 @@ public class PlayerProvider {
         }
     };
 
-    public PlayerProvider(Context context, SongDatabase songDb) {
+    public PlayerManager(Context context, SongDatabase songDb) {
         this.context = new WeakReference<>(context);
         this.mSongDatabase = songDb;
 
@@ -62,6 +66,16 @@ public class PlayerProvider {
         return songs;
     }
 
+    public void setIsMusicPlayingCallback(IsMusicPlayingCallback isMusicPlayingCallback) {
+        this.isMusicPlayingCallbacks.add(isMusicPlayingCallback);
+    }
+
+    private void notifyAllSubscribersOnMusicStateChange(boolean isPlayingState) {
+        for (IsMusicPlayingCallback callback: isMusicPlayingCallbacks) {
+            callback.changeMusicPlaybackState(isPlayingState);
+        }
+    }
+
     public void play() {
         if(!serviceBound) {
             startPlayerService();
@@ -69,12 +83,12 @@ public class PlayerProvider {
         else {
             player.playMedia();
         }
-        isMusicPlayingCallback.isMusicPlaying(true);
+        notifyAllSubscribersOnMusicStateChange(true);
     }
 
     public void pause() {
         player.pauseMedia();
-        isMusicPlayingCallback.isMusicPlaying(false);
+        notifyAllSubscribersOnMusicStateChange(false);
     }
 
     public void playNextSong() {
@@ -91,20 +105,26 @@ public class PlayerProvider {
         Intent broadcastIntent = new Intent(PLAY_NEW_SONG);
         broadcastIntent.putExtra(SONG_DATA, songs.getValue().get(currentSongIndex).getData());
         context.get().sendBroadcast(broadcastIntent);
-        isMusicPlayingCallback.isMusicPlaying(true);
+        notifyAllSubscribersOnMusicStateChange(true);
     }
 
     public void playSelectedSong(int index) {
         if (index > 0 && index < songs.getValue().size()) {
             currentSongIndex = index;
-            playNewSong();
+
+            if(!serviceBound) {
+                startPlayerService();
+            }
+            else {
+                playNewSong();
+            }
         }
     }
 
     private void startPlayerService() {
         Intent playerIntent = new Intent(context.get(), PlayerService.class);
         Song currentSong = songs.getValue().get(currentSongIndex);
-        playerIntent.putExtra("media", currentSong.getData());
+        playerIntent.putExtra(PlayerService.AUDIO_FILE_DATA, currentSong.getData());
         //needs to be both started and bound so music will play while the app is not active
         context.get().startService(playerIntent);
         context.get().bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);

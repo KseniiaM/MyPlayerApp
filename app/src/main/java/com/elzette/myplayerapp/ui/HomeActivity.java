@@ -1,6 +1,10 @@
 package com.elzette.myplayerapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +20,9 @@ public class HomeActivity extends AppCompatActivity {
 
     private NavController mNavController;
     private HomeViewModel mViewModel;
+
+    private HeadphonesUnpluggedReceiver receiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +35,12 @@ public class HomeActivity extends AppCompatActivity {
         }
         mNavController = Navigation.findNavController(this, R.id.nav_host_fragment);
         mNavController.navigate(R.id.songListFragment);
+    }
+
+    @Override
+    protected void onStart() {
+        subscribeToHeadphonesState();
+        super.onStart();
     }
 
     @Override
@@ -46,6 +59,40 @@ public class HomeActivity extends AppCompatActivity {
                     PermissionManager.setReadStoragePermission(false);
                 }
                 return;
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(receiver);
+        super.onDestroy();
+    }
+
+    private void subscribeToHeadphonesState() {
+        IntentFilter plugReceiver = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+        receiver = new HeadphonesUnpluggedReceiver();
+        registerReceiver(receiver, plugReceiver);
+    }
+
+    public class HeadphonesUnpluggedReceiver extends BroadcastReceiver {
+        @Override public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction())
+            {
+                case Intent.ACTION_HEADSET_PLUG:
+                    handleHeadsetPlugged(intent);
+            }
+        }
+
+        private void handleHeadsetPlugged(Intent intent) {
+            int state = intent.getIntExtra("state", -1);
+            switch (state) {
+                case 1:
+                    mViewModel.resumePlayback();
+                    break;
+                case 0:
+                    mViewModel.pausePlayback();
+                    break;
             }
         }
     }

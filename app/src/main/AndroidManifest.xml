@@ -26,6 +26,18 @@
         <service android:name=".services.PlayerService"
                  android:exported="false"
                  android:stopWithTask="true"/>
+        <receiver android:name=".ui.HomeActivity$HeadphonesUnpluggedReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_HEADSET_PLUG" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".providers.NotificationButtonBroadcastReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="NOTIFICATION_INTENT_FILTER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".providers.PlayerManager$NotificationBroadcastReceiver" android:exported="true"/>
     </application>
 
 </manifest>
