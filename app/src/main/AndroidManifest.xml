@@ -31,13 +31,12 @@
                 <action android:name="android.intent.action.ACTION_HEADSET_PLUG" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".providers.NotificationButtonBroadcastReceiver" android:exported="true">
-            <intent-filter>
-                <action android:name="NOTIFICATION_INTENT_FILTER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".providers.PlayerManager$NotificationBroadcastReceiver" android:exported="true"/>
+        <!--<receiver android:name=".services.PlayerService$NotificationButtonBroadcastReceiver" android:exported="true">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="NOTIFICATION_INTENT_FILTER" />-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
     </application>
 
 </manifest>

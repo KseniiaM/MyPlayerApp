@@ -10,6 +10,7 @@ import com.elzette.myplayerapp.di.DatabaseComponent;
 import com.elzette.myplayerapp.di.DatabaseModule;
 import com.elzette.myplayerapp.di.PlayerProviderComponent;
 import com.elzette.myplayerapp.di.PlayerProviderModule;
+import com.elzette.myplayerapp.providers.MusicFileSystemScanner;
 
 public class App extends Application {
 
@@ -34,5 +35,7 @@ public class App extends Application {
                         .databaseModule(new DatabaseModule())
                         .playerProviderModule(new PlayerProviderModule())
                         .build();
+
+        //musicFileSystemScannerComponent = Dagge
     }
 }

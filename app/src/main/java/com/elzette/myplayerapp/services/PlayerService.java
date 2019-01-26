@@ -10,26 +10,94 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import com.elzette.myplayerapp.App;
+import com.elzette.myplayerapp.callbacks.UpdateCollectionCallback;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.providers.MediaPlayerProvider;
+import com.elzette.myplayerapp.providers.MusicFileSystemScanner;
 import com.elzette.myplayerapp.providers.NotificationProvider;
-import com.elzette.myplayerapp.providers.PlayerManager;
+import com.elzette.myplayerapp.providers.PlayerConnectionManager;
 
-public class PlayerService extends Service {
+import java.security.Permission;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+public class PlayerService extends Service implements UpdateCollectionCallback {
 
     //TODO create a separate notification manager
     public static final String AUDIO_FILE_DATA = "audio_file_data";
 
+    private List<Song> songs = new ArrayList<>();
     private MediaPlayerProvider mediaPlayerProvider;
     private String mediaFilePath;
+    private int currentSongIndex;
 
     private BroadcastReceiver playNewAudioReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mediaFilePath = intent.getExtras().getString(PlayerManager.SONG_DATA);
+            mediaFilePath = intent.getExtras().getString(PlayerConnectionManager.SONG_DATA);
             mediaPlayerProvider.startPlayer(mediaFilePath);
         }
     };
+
+    public BroadcastReceiver notificationButtonBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            switch (intent.getStringExtra("extra")) {
+                case "prev":
+                    playPrevSong();
+                    break;
+                case "play":
+                    playMedia();
+                    break;
+                case "next":
+                    playNextSong();
+                    break;
+            }
+        }
+    };
+
+    private final IBinder iBinder = new LocalBinder();
+
+    @Inject
+    MusicFileSystemScanner scanner;
+
+    //TODO will start observing the song list here
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        try {
+            //An audio file is passed to the service through putExtra();
+            //mediaFilePath = intent.getExtras().getString(AUDIO_FILE_DATA);
+            currentSongIndex = intent.getExtras().getInt(AUDIO_FILE_DATA);
+        } catch (NullPointerException e) {
+            currentSongIndex = 0;
+        }
+
+        ((App) getApplication()).playerComponent.injectPlayerProviderComponent(this);
+        scanner.setUpdateCollectionCallback(this);
+        subscribeToNotificationButtonBroadcast();
+
+        songs = scanner.getSongs();
+        mediaPlayerProvider = new MediaPlayerProvider();
+        IntentFilter filter = new IntentFilter(PlayerConnectionManager.PLAY_NEW_SONG);
+        registerReceiver(playNewAudioReceiver, filter);
+
+        //if (mediaFilePath != null && !mediaFilePath.equals("")) {
+        if (songs != null && songs.size() > currentSongIndex) {
+            mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
+        }
+
+        runAsForeground();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void runAsForeground() {
+        NotificationProvider notificationProvider = new NotificationProvider();
+        Notification notification = notificationProvider.createNotification(this, new Song("batat", "batatovich", "", "ivy"));
+        startForeground(NotificationProvider.NOTIFICATION_ID, notification);
+    }
 
     public void playMedia() {
         mediaPlayerProvider.playMedia();
@@ -39,35 +107,37 @@ public class PlayerService extends Service {
         mediaPlayerProvider.pauseMedia();
     }
 
-    private final IBinder iBinder = new LocalBinder();
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        try {
-            //An audio file is passed to the service through putExtra();
-            mediaFilePath = intent.getExtras().getString(AUDIO_FILE_DATA);
-        } catch (NullPointerException e) {
-            stopSelf();
-        }
-
-        mediaPlayerProvider = new MediaPlayerProvider();
-        IntentFilter filter = new IntentFilter(PlayerManager.PLAY_NEW_SONG);
-        registerReceiver(playNewAudioReceiver, filter);
-
-        if (mediaFilePath != null && !mediaFilePath.equals("")) {
-            mediaPlayerProvider.startPlayer(mediaFilePath);
-        }
-
-        runAsForeground();
-
-        return super.onStartCommand(intent, flags, startId);
+    public void playNextSong() {
+        currentSongIndex = currentSongIndex < (songs.size() - 1) ? currentSongIndex + 1 : 0;
+        mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
     }
 
-    private void runAsForeground() {
-        NotificationProvider notificationProvider = new NotificationProvider();
-        Notification notification = notificationProvider.createNotification(this, new Song("batat", "batatovich","","ivy"));
-        startForeground(NotificationProvider.NOTIFICATION_ID, notification);
+    public void playPrevSong() {
+        currentSongIndex = currentSongIndex == 0 ? songs.size() - 1 : currentSongIndex - 1;
+        mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
     }
+
+    public void playSelectedSong(int index) {
+        if (index > 0 && index < songs.size()) {
+            currentSongIndex = index;
+            mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
+        }
+    }
+
+    private String getMediaFilePathFromSongCollection() {
+        Song currentSong = songs.get(currentSongIndex);
+        return currentSong.getData();
+    }
+
+//    public void setIsMusicPlayingCallback(IsMusicPlayingCallback isMusicPlayingCallback) {
+//        this.isMusicPlayingCallbacks.add(isMusicPlayingCallback);
+//    }
+//
+//    private void notifyAllSubscribersOnMusicStateChange(boolean isPlayingState) {
+//        for (IsMusicPlayingCallback callback: isMusicPlayingCallbacks) {
+//            callback.changeMusicPlaybackState(isPlayingState);
+//        }
+//    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -75,14 +145,24 @@ public class PlayerService extends Service {
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+        scanner.removeUpdateCollectionCallback(this);
+        return super.onUnbind(intent);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         mediaPlayerProvider.destroyMediaPlayer();
-
-        if(playNewAudioReceiver != null)
+        unsubscribeFromNotificationButtons();
+        if (playNewAudioReceiver != null)
             unregisterReceiver(playNewAudioReceiver);
     }
 
+    @Override
+    public void onCollectionUpdated(List collection) {
+        songs = collection;
+    }
 
     public class LocalBinder extends Binder {
         public PlayerService getService() {
@@ -90,25 +170,30 @@ public class PlayerService extends Service {
         }
     }
 
+//    public class NotificationButtonBroadcastReceiver extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context ctx, Intent intent) {
+//            switch (intent.getStringExtra("extra")) {
+//                case "prev":
+//                    playPrevSong();
+//                    break;
+//                case "play":
+//                    playMedia();
+//                    break;
+//                case "next":
+//                    playNextSong();
+//                    break;
+//            }
+//        }
+//    }
 
-    public class NotificationBroadcastReceiver extends BroadcastReceiver {
+    private void subscribeToNotificationButtonBroadcast() {
+        IntentFilter filter = new IntentFilter(NotificationProvider.NOTIFICATION_INTENT_FILTER);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        this.registerReceiver(notificationButtonBroadcastReceiver, filter);
+    }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case "prev":
-                    Toast t = Toast.makeText(context, "prev", Toast.LENGTH_SHORT);
-                    t.show();
-                    break;
-                case "play":
-                    Toast t1 = Toast.makeText(context, "play", Toast.LENGTH_SHORT);
-                    t1.show();
-                    break;
-                case "next":
-                    Toast t2 = Toast.makeText(context, "next", Toast.LENGTH_SHORT);
-                    t2.show();
-                    break;
-            }
-        }
+    private void unsubscribeFromNotificationButtons() {
+        this.unregisterReceiver(notificationButtonBroadcastReceiver);
     }
 }

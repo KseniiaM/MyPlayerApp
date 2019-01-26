@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -12,6 +13,7 @@ import android.widget.RemoteViews;
 
 import com.elzette.myplayerapp.R;
 import com.elzette.myplayerapp.dal.Song;
+import com.elzette.myplayerapp.services.PlayerService;
 
 import java.lang.ref.WeakReference;
 
@@ -27,13 +29,13 @@ public class NotificationProvider {
     private PendingIntent pIntent2;
     private PendingIntent pIntent3;
 
-    private NotificationButtonBroadcastReceiver receiver;
+//    private NotificationButtonBroadcastReceiver receiver;
     private WeakReference<Context> context;
 
     public Notification createNotification(Context context, Song song) {
         this.context = new WeakReference<>(context);
         createIntents();
-        subscribeToNotificationButtonBoradcast();
+        //subscribeToNotificationButtonBoradcast();
         RemoteViews notificationContent = createRemoteView(song);
 
         NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
@@ -62,7 +64,7 @@ public class NotificationProvider {
     }
 
     private Intent createIntent(String action, String extra) {
-        Intent intent = new Intent(context.get(), NotificationButtonBroadcastReceiver.class);
+        Intent intent = new Intent(context.get(), BroadcastReceiver.class);
         intent.setAction(action);
         intent.putExtra("extra", extra);
         return intent;
@@ -78,13 +80,13 @@ public class NotificationProvider {
         return remoteViews;
     }
 
-    private void subscribeToNotificationButtonBoradcast() {
-        IntentFilter filter = new IntentFilter(NOTIFICATION_INTENT_FILTER);
-        receiver = new NotificationButtonBroadcastReceiver();
-        context.get().registerReceiver(receiver, filter);
-    }
-
-    private void unsubscribeFromNotificationButtons() {
-        context.get().unregisterReceiver(receiver);
-    }
+//    private void subscribeToNotificationButtonBoradcast() {
+//        IntentFilter filter = new IntentFilter(NOTIFICATION_INTENT_FILTER);
+//        receiver = new PlayerService.NotificationButtonBroadcastReceiver();
+//        context.get().registerReceiver(receiver, filter);
+//    }
+//
+//    private void unsubscribeFromNotificationButtons() {
+//        context.get().unregisterReceiver(receiver);
+//    }
 }

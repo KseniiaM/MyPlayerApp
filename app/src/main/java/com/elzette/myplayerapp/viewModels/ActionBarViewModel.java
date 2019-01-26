@@ -5,43 +5,51 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.databinding.ObservableBoolean;
 
 import com.elzette.myplayerapp.App;
+import com.elzette.myplayerapp.callbacks.BoundToServiceCallback;
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
-import com.elzette.myplayerapp.providers.PlayerManager;
+import com.elzette.myplayerapp.providers.MusicFileSystemScanner;
+import com.elzette.myplayerapp.providers.PlayerConnectionManager;
 import com.elzette.myplayerapp.callbacks.UpdateCollectionCallback;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-public class ActionBarViewModel extends AndroidViewModel implements UpdateCollectionCallback, IsMusicPlayingCallback {
+public class ActionBarViewModel extends AndroidViewModel implements
+                                        UpdateCollectionCallback,
+                                        IsMusicPlayingCallback {
 
     public ObservableBoolean isPlaying = new ObservableBoolean(false);
     public boolean canPlayMusic = false;
 
     @Inject
-    PlayerManager playerManager;
+    PlayerConnectionManager playerConnectionManager;
+
+    @Inject
+    MusicFileSystemScanner scanner;
 
     public ActionBarViewModel(Application app) {
         super(app);
+        //TODO check if this is needed
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
-        playerManager.getSongs().setCollectionUpdateSubscribers(this);
-        playerManager.setIsMusicPlayingCallback(this);
+        scanner.setUpdateCollectionCallback(this);
+        playerConnectionManager.setIsMusicPlayingCallback(this);
     }
 
     public void onPlayClick() {
-        playerManager.play();
+        playerConnectionManager.playMedia();
     }
 
     public void onPauseClick() {
-        playerManager.pause();
+        playerConnectionManager.pauseMedia();
     }
 
     public void onNextClick() {
-        playerManager.playNextSong();
+        playerConnectionManager.playNextSong();
     }
 
     public void onPrevClick() {
-        playerManager.playPrevSong();
+        playerConnectionManager.playPrevSong();
     }
 
     @Override
@@ -56,7 +64,8 @@ public class ActionBarViewModel extends AndroidViewModel implements UpdateCollec
 
     @Override
     protected void onCleared() {
-        playerManager.getSongs().removeFromCollectionUpdateSubscribers(this);
+        scanner.removeUpdateCollectionCallback(this);
+        playerConnectionManager.removeIsMusicPlayingCallback(this);
         super.onCleared();
     }
 }

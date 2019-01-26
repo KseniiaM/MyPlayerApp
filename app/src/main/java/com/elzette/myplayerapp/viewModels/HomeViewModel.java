@@ -4,8 +4,11 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 
 import com.elzette.myplayerapp.App;
+import com.elzette.myplayerapp.callbacks.BoundToServiceCallback;
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
-import com.elzette.myplayerapp.providers.PlayerManager;
+import com.elzette.myplayerapp.providers.MusicFileSystemScanner;
+import com.elzette.myplayerapp.providers.PlayerConnectionManager;
+import com.elzette.myplayerapp.services.PlayerService;
 
 import javax.inject.Inject;
 
@@ -14,32 +17,41 @@ public class HomeViewModel extends AndroidViewModel implements IsMusicPlayingCal
     private boolean isMusicPlaying;
 
     @Inject
-    PlayerManager playerManager;
+    PlayerConnectionManager playerConnectionManager;
+
+    @Inject
+    MusicFileSystemScanner fileSystemScanner;
 
     public HomeViewModel(Application app) {
         super(app);
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
-        playerManager.setIsMusicPlayingCallback(this);
+        playerConnectionManager.setIsMusicPlayingCallback(this);
     }
 
     public void loadMusicData() {
-        playerManager.loadSongs();
+        fileSystemScanner.loadSongs();
     }
 
     public void pausePlayback() {
         if(isMusicPlaying) {
-            playerManager.pause();
+            playerConnectionManager.pauseMedia();
         }
     }
 
     public void resumePlayback() {
         if(!isMusicPlaying) {
-            playerManager.play();
+            playerConnectionManager.playMedia();
         }
     }
 
     @Override
     public void changeMusicPlaybackState(boolean isPlaying) {
         isMusicPlaying = isPlaying;
+    }
+
+    @Override
+    protected void onCleared() {
+        playerConnectionManager.removeIsMusicPlayingCallback(this);
+        super.onCleared();
     }
 }
