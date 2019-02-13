@@ -5,7 +5,6 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.databinding.ObservableBoolean;
 
 import com.elzette.myplayerapp.App;
-import com.elzette.myplayerapp.callbacks.BoundToServiceCallback;
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
 import com.elzette.myplayerapp.providers.MusicFileSystemScanner;
 import com.elzette.myplayerapp.providers.PlayerConnectionManager;

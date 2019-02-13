@@ -6,6 +6,8 @@
     <color name="darkGrayAdditionalTextColor">#444444</color>
     <color name="darkGrayMainTextColor">#222222</color>
     <color name="greyColor">#AAAAAA</color>
-    <color name="redColor">#c63838</color>
-    <color name="darkRedColor">#880000</color>
+    <!--<color name="redColor">#c63838</color>-->
+    <!--<color name="darkRedColor">#880000</color>-->
+    <color name="redColor">#307ec2</color>
+    <color name="darkRedColor">#02477c</color>
 </resources>

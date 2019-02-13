@@ -4,11 +4,9 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 
 import com.elzette.myplayerapp.App;
-import com.elzette.myplayerapp.callbacks.BoundToServiceCallback;
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
 import com.elzette.myplayerapp.providers.MusicFileSystemScanner;
 import com.elzette.myplayerapp.providers.PlayerConnectionManager;
-import com.elzette.myplayerapp.services.PlayerService;
 
 import javax.inject.Inject;
 
@@ -25,6 +23,7 @@ public class HomeViewModel extends AndroidViewModel implements IsMusicPlayingCal
     public HomeViewModel(Application app) {
         super(app);
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
+
         playerConnectionManager.setIsMusicPlayingCallback(this);
     }
 

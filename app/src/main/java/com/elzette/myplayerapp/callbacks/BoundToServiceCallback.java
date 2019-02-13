@@ -1,5 +1,5 @@
-package com.elzette.myplayerapp.callbacks;
-
-public interface BoundToServiceCallback {
-    void onBoundToService();
-}
+//package com.elzette.myplayerapp.callbacks;
+//
+//public interface BoundToServiceCallback {
+//    void onBoundToService();
+//}

@@ -14,9 +14,10 @@ public class PlayerProviderModule {
 
     @Provides
     @DatabaseApplicationScope
-    public PlayerConnectionManager getPlayerProvider(Context context, SongDatabase db, MusicFileSystemScanner scanner) {
-        return new PlayerConnectionManager(context, db, scanner);
+    public PlayerConnectionManager getPlayerProvider(Context context) {
+        return new PlayerConnectionManager(context);
     }
+
 
     @Provides
     @DatabaseApplicationScope
