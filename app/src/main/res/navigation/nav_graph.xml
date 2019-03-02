@@ -2,15 +2,15 @@
 <navigation xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/songListFragment">
+    app:startDestination="@id/pager_fragment">
     <fragment
         android:id="@+id/songStatusFragment"
         android:name="com.elzette.myplayerapp.ui.SongStatusFragment"
         android:label="song_status_fragment"
         tools:layout="@layout/song_status_fragment" />
     <fragment
-        android:id="@+id/songListFragment"
-        android:name="com.elzette.myplayerapp.ui.SongListFragment"
-        android:label="song_list_fragment"
-        tools:layout="@layout/song_list_fragment" />
+        android:id="@+id/pager_fragment"
+        android:name="com.elzette.myplayerapp.ui.PagerFragment"
+        android:label="pagerFragment"
+        tools:layout="@layout/pager_fragment" />
 </navigation>

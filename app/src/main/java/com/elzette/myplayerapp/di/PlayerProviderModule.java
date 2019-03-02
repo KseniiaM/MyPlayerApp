@@ -2,9 +2,9 @@ package com.elzette.myplayerapp.di;
 
 import android.content.Context;
 
+import com.elzette.myplayerapp.providers.DatabaseManager;
 import com.elzette.myplayerapp.providers.MusicFileSystemScanner;
 import com.elzette.myplayerapp.providers.PlayerConnectionManager;
-import com.elzette.myplayerapp.dal.SongDatabase;
 
 import dagger.Module;
 import dagger.Provides;
@@ -18,10 +18,9 @@ public class PlayerProviderModule {
         return new PlayerConnectionManager(context);
     }
 
-
     @Provides
     @DatabaseApplicationScope
-    public MusicFileSystemScanner getFileSystemScanner(Context context) {
-        return new MusicFileSystemScanner(context);
+    public MusicFileSystemScanner getFileSystemScanner(Context context, DatabaseManager dbManager) {
+        return new MusicFileSystemScanner(context, dbManager);
     }
 }

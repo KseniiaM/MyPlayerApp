@@ -4,6 +4,7 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.elzette.myplayerapp.dal.SongDatabase;
+import com.elzette.myplayerapp.providers.DatabaseManager;
 
 import dagger.Module;
 import dagger.Provides;
@@ -13,9 +14,7 @@ public class DatabaseModule {
 
     @Provides
     @DatabaseApplicationScope
-    public SongDatabase getDatabase(Context context) {
-        return Room.databaseBuilder(context, SongDatabase.class, "database")
-                .allowMainThreadQueries()
-                .build();
+    public DatabaseManager getDatabaseManager(Context context) {
+        return new DatabaseManager(context);
     }
 }

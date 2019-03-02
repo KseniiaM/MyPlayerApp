@@ -1,10 +1,13 @@
 package com.elzette.myplayerapp.providers;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
 import com.elzette.myplayerapp.services.PlayerService;
@@ -30,18 +33,13 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
         playerService = binder.getService();
         serviceBound = true;
         playerService.setIsMusicPlayingCallback(this);
-    }
-
-    @Override
-    public void onBindingDied(ComponentName name) {
-        playerService.removeIsMusicPlayingCallback();
-        serviceBound = false;
+        subscribeToNotificationButtonBroadcast();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        playerService.removeIsMusicPlayingCallback();
         serviceBound = false;
+        unsubscribeFromNotificationButtons();
     }
 
     public PlayerConnectionManager(Context context) {
@@ -58,10 +56,10 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
         }
     }
 
-    //should disable these 4 methods if playback not started yet
-
     public void pauseMedia() {
-        playerService.pauseMedia();
+        if(serviceBound) {
+            playerService.pauseMedia();
+        }
     }
 
     public void playPrevSong() {
@@ -108,7 +106,44 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
         Intent playerIntent = new Intent(context.get(), PlayerService.class);
         playerIntent.putExtra(PlayerService.AUDIO_FILE_DATA, position);
         //needs to be both started and bound so music will play while the app is not active
-        context.get().startService(playerIntent);
+        //context.get().startService(playerIntent);
         context.get().bindService(playerIntent, this, Context.BIND_AUTO_CREATE);
+    }
+
+    public BroadcastReceiver notificationButtonBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            switch (intent.getStringExtra("extra")) {
+                case "prev":
+                    playerService.playPrevSong();
+                    break;
+                case "play":
+                    playerService.playMedia();
+                    break;
+                case "pause":
+                    playerService.pauseMedia();
+                    break;
+                case "next":
+                    playerService.playNextSong();
+                    break;
+                case "close":
+                    playerService.stopForeground(true);
+                    context.get().unbindService(PlayerConnectionManager.this);
+                    serviceBound = false;
+                    unsubscribeFromNotificationButtons();
+                    break;
+            }
+        }
+    };
+
+    private void subscribeToNotificationButtonBroadcast() {
+        //Log.d("Notification","subscribeToNotificationButtonBroadcast" + getApplicationContext());
+        IntentFilter filter = new IntentFilter(NotificationProvider.NOTIFICATION_INTENT_FILTER);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        context.get().registerReceiver(notificationButtonBroadcastReceiver, filter);
+    }
+
+    private void unsubscribeFromNotificationButtons() {
+        context.get().unregisterReceiver(notificationButtonBroadcastReceiver);
     }
 }

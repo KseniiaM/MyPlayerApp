@@ -45,34 +45,29 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         }
     };
 
-    public BroadcastReceiver notificationButtonBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context ctx, Intent intent) {
-            switch (intent.getStringExtra("extra")) {
-                case "prev":
-                    playPrevSong();
-                    break;
-                case "play":
-                    playMedia();
-                    break;
-                case "pause":
-                    pauseMedia();
-                    break;
-                case "next":
-                    playNextSong();
-                    break;
-                case "close":
-                    //notificationProvider.dismissNotification();
-                    //unbindService();
-                    //todo should think of a way to connect between playerservice and connectionManager
-
-                    //stopSelf();
-                    unbindService((ServiceConnection) callback);
-                    stopForeground(true);
-                    break;
-            }
-        }
-    };
+//    public BroadcastReceiver notificationButtonBroadcastReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context ctx, Intent intent) {
+//            switch (intent.getStringExtra("extra")) {
+//                case "prev":
+//                    playPrevSong();
+//                    break;
+//                case "play":
+//                    playMedia();
+//                    break;
+//                case "pause":
+//                    pauseMedia();
+//                    break;
+//                case "next":
+//                    playNextSong();
+//                    break;
+//                case "close":
+//                    stopForeground(true);
+//                    ctx.getApplicationContext().unbindService((ServiceConnection) callback);
+//                    break;
+//            }
+//        }
+//    };
 
     private final IBinder iBinder = new LocalBinder();
 
@@ -82,6 +77,11 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
     //TODO will start observing the song list here
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        runService(intent);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void runService(Intent intent) {
         try {
             currentSongIndex = intent.getExtras().getInt(AUDIO_FILE_DATA);
         } catch (NullPointerException e) {
@@ -90,7 +90,7 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
 
         ((App) getApplication()).playerComponent.injectPlayerProviderComponent(this);
         scanner.setUpdateCollectionCallback(this);
-        subscribeToNotificationButtonBroadcast();
+        //subscribeToNotificationButtonBroadcast();
 
         songs = scanner.getSongs();
         mediaPlayerProvider = new MediaPlayerProvider();
@@ -102,7 +102,6 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         }
 
         runAsForeground();
-        return super.onStartCommand(intent, flags, startId);
     }
 
     private void runAsForeground() {
@@ -149,12 +148,8 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
 
     @Override
     public IBinder onBind(Intent intent) {
+        runService(intent);
         return iBinder;
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        super.onRebind(intent);
     }
 
     @Override
@@ -166,9 +161,10 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        notifyOnMusicStateChange(false);
         notificationProvider.dismissNotification();
         mediaPlayerProvider.destroyMediaPlayer();
-        unsubscribeFromNotificationButtons();
+        //unsubscribeFromNotificationButtons();
         if (playNewAudioReceiver != null)
             unregisterReceiver(playNewAudioReceiver);
     }
@@ -184,22 +180,16 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         }
     }
 
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        removeIsMusicPlayingCallback();
-        super.onTaskRemoved(rootIntent);
-    }
-
-    private void subscribeToNotificationButtonBroadcast() {
-        Log.d("Notification","subscribeToNotificationButtonBroadcast" + getApplicationContext());
-        IntentFilter filter = new IntentFilter(NotificationProvider.NOTIFICATION_INTENT_FILTER);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        getApplicationContext().registerReceiver(notificationButtonBroadcastReceiver, filter);
-    }
-
-    private void unsubscribeFromNotificationButtons() {
-        getApplicationContext().unregisterReceiver(notificationButtonBroadcastReceiver);
-    }
+//    private void subscribeToNotificationButtonBroadcast() {
+//        Log.d("Notification","subscribeToNotificationButtonBroadcast" + getApplicationContext());
+//        IntentFilter filter = new IntentFilter(NotificationProvider.NOTIFICATION_INTENT_FILTER);
+//        filter.addCategory(Intent.CATEGORY_DEFAULT);
+//        getApplicationContext().registerReceiver(notificationButtonBroadcastReceiver, filter);
+//    }
+//
+//    private void unsubscribeFromNotificationButtons() {
+//        getApplicationContext().unregisterReceiver(notificationButtonBroadcastReceiver);
+//    }
 
     private void notifyOnMusicStateChange(boolean isPlayingState) {
         callback.changeMusicPlaybackState(isPlayingState);
@@ -208,9 +198,5 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
 
     public void setIsMusicPlayingCallback(IsMusicPlayingCallback callback) {
         this.callback = callback;
-    }
-
-    public void removeIsMusicPlayingCallback() {
-        this.callback = null;
     }
 }

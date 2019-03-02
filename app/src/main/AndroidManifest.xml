@@ -15,17 +15,29 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.HomeActivity"
-                  android:launchMode="singleTop"
-                  android:screenOrientation="portrait">
+
+        <activity android:name=".ui.SplashActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ui.HomeActivity"
+                  android:launchMode="singleTop"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service android:name=".services.PlayerService"
-                 android:exported="false"
-                 android:stopWithTask="true"/>
+                 android:exported="false"/>
         <receiver android:name=".ui.HomeActivity$HeadphonesUnpluggedReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_HEADSET_PLUG" />

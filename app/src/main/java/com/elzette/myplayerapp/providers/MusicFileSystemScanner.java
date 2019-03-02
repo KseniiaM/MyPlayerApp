@@ -14,13 +14,28 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class MusicFileSystemScanner {
 
     WeakReference<Context> context;
+    DatabaseManager dbManager;
+
     private ObserverArrayList<Song> songs = new ObserverArrayList<>();
 
-    public MusicFileSystemScanner(Context context) {
+    public MusicFileSystemScanner(Context context, DatabaseManager dbManager) {
         this.context = new WeakReference<>(context);
+        this.dbManager = dbManager;
+
+         Observable.just(songs.getValue())
+                   .subscribeOn(Schedulers.io())
+                   .observeOn(AndroidSchedulers.mainThread())
+                   .subscribe(value -> dbManager.saveSongsToDb(value));
     }
 
     public void setUpdateCollectionCallback(UpdateCollectionCallback callback) {
@@ -35,7 +50,19 @@ public class MusicFileSystemScanner {
         return songs.getValue();
     }
 
-    public void loadSongs() {       //To be moved out (suggest to have the initial scanning activity)
+    public void initSongStorage() {
+        //checks if some of the songs already present, launch synchronous scan if not
+        Disposable isFirstLaunch = Observable.just(dbManager.isDbEmpty()).subscribeOn(Schedulers.computation()).subscribe();
+        if (true) {
+            //launch sync scan
+            loadSongs();
+        }
+        else {
+            //start async scan to compare db and file system and return immediately
+        }
+    }
+
+    public List<Song> loadSongs() {       //To be moved out (suggest to have the initial scanning activity)
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         ContentResolver cr = context.get().getContentResolver();
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
@@ -53,7 +80,7 @@ public class MusicFileSystemScanner {
                 // Save to db
                 Song songToAdd = new Song(data, title, album, artist);
                 tempSongListInsteadOfDb.add(songToAdd);
-                //mSongDatabase.songDao().insert(songToAdd);
+                //dbManager.addSong(songToAdd);
                 //songsLiveData.getValue().add(songToAdd);
             }
 //            songsLiveData = mSongDatabase.songDao().getAll();
@@ -71,5 +98,7 @@ public class MusicFileSystemScanner {
         if (cursor != null) {
             cursor.close();
         }
+
+        return tempSongListInsteadOfDb;
     }
 }

@@ -14,6 +14,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+
+//TODO use livedata from db here
 public class SongListViewModel extends AndroidViewModel implements
                                        UpdateCollectionCallback {
 

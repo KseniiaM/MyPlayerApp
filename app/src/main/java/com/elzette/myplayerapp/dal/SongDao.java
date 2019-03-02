@@ -1,5 +1,6 @@
 package com.elzette.myplayerapp.dal;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -16,7 +17,10 @@ public interface SongDao {
     Song getById(long id);
 
     @Query("SELECT * FROM Song")
-    List<Song> getAll();
+    LiveData<List<Song>> getAll();
+
+    @Query("SELECT * FROM Song LIMIT 1")
+    Song getFirstSong();
 
     @Insert
     long insert(Song song);

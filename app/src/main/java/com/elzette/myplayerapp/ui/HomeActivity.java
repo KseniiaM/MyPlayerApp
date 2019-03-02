@@ -34,7 +34,7 @@ public class HomeActivity extends AppCompatActivity {
             mViewModel.loadMusicData();
         }
         mNavController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        mNavController.navigate(R.id.songListFragment);
+        mNavController.navigate(R.id.pager_fragment);
     }
 
     @Override

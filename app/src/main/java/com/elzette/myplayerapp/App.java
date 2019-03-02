@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.elzette.myplayerapp.di.ContextModule;
 import com.elzette.myplayerapp.di.DaggerPlayerProviderComponent;
+import com.elzette.myplayerapp.di.DatabaseModule;
 import com.elzette.myplayerapp.di.PlayerProviderComponent;
 import com.elzette.myplayerapp.di.PlayerProviderModule;
 

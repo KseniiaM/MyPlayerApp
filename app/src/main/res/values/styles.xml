@@ -15,4 +15,9 @@
         <item name="layout_constraintTop_toTopOf">parent</item>
         <item name="layout_constraintHorizontal_chainStyle">spread_inside</item>
     </style>
+
+    <style name="AppTheme.Launcher">
+        <item name="android:background">@drawable/splash_screen</item>
+        <item name="colorPrimaryDark">@android:color/white</item>
+    </style>
 </resources>
