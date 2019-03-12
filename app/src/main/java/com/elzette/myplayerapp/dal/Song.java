@@ -3,8 +3,10 @@ package com.elzette.myplayerapp.dal;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import com.elzette.myplayerapp.models.MusicItemBaseModel;
+
 @Entity
-public class Song {
+public class Song implements MusicItemBaseModel {
 
     @PrimaryKey(autoGenerate = true)
     public long id;

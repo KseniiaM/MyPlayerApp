@@ -134,7 +134,7 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
     }
 
     public void playSelectedSong(int index) {
-        if (index > 0 && index < songs.size()) {
+        if (index >= 0 && index < songs.size()) {
             currentSongIndex = index;
             mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
             notifyOnMusicStateChange(true);

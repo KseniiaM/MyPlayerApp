@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MyPlayerApp</string>
+    <string name="current_song">Current song</string>
+    <string name="artists">Artists</string>
+    <string name="albums">Albums</string>
+    <string name="songs">Songs</string>
 </resources>
