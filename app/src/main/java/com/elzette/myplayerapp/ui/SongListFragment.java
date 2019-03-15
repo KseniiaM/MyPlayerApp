@@ -26,22 +26,29 @@ public class SongListFragment extends Fragment {
 
     private static final String TAG = SongListFragment.class.getSimpleName();
 
-    private RecyclerView mRecyclerView;
-    private MusicAdapter mAdapter;
+    protected RecyclerView mRecyclerView;
+    protected MusicAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private SongListViewModel mViewModel;
-    private List<? extends MusicItemBaseModel> currentItems;
-    private MusicItemBaseModel mParentItem;
-    private int mSongDisplayType;
+    protected SongListViewModel mViewModel;
+    protected List<? extends MusicItemBaseModel> currentItems;
+
+    protected int viewHolderType;
+    protected int holderLayoutId;
+    protected MusicItemBaseModel parentItem;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        viewHolderType = MusicAdapter.SONG_VIEW_HOLDER_ID;
+        holderLayoutId = R.layout.song_item;
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         Log.d(TAG, "onCreateView");
-
-        mSongDisplayType = getArguments().getInt(HomeActivity.LAYOUT_POSITION);
-        mParentItem = (MusicItemBaseModel) getArguments().getSerializable(HomeActivity.SERIALIZED_MODEL);
+        parentItem = (MusicItemBaseModel) getArguments().getSerializable(HomeActivity.SERIALIZED_MODEL);
         SongListFragmentBinding binding = InitViewModel(inflater);
         return binding.getRoot();
     }
@@ -74,7 +81,7 @@ public class SongListFragment extends Fragment {
         });
     }
 
-    private void initRecyclerView(View view) {
+    protected void initRecyclerView(View view) {
 
         mRecyclerView = view.findViewById(R.id.song_recycler_view);
         mRecyclerView.setHasFixedSize(true);
@@ -82,80 +89,28 @@ public class SongListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new MusicAdapter(mSongDisplayType);
-        mAdapter.onClickListener = (v, position, pageType) -> {
-            choseClickAction(position, pageType);
+        mAdapter = new MusicAdapter(viewHolderType, holderLayoutId);
+        mAdapter.onClickListener = (v, position) -> {
+            choseClickAction(position);
         };
 
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    private void addCurrentListItems() {
-        if(mParentItem == null) {
-            currentItems = mViewModel.getFormattedSongList(mSongDisplayType);
+    protected void addCurrentListItems() {
+        if(parentItem == null) {
+            currentItems = mViewModel.getSongsLiveData().getValue();
         }
-        if(mParentItem instanceof AlbumModel) {
-            currentItems = mViewModel.getSongsForAlbum((AlbumModel) mParentItem);
+        if(parentItem instanceof AlbumModel) {
+            currentItems = mViewModel.getSongsForAlbum((AlbumModel) parentItem);
         }
-        if(mParentItem instanceof ArtistModel) {
-            currentItems = mViewModel.getSongsForArtist((ArtistModel) mParentItem);
-        }
-    }
-
-    private void choseClickAction(int position, int pageType) {
-        switch (pageType) {
-            case 1:
-                Song selectedSong = (Song) currentItems.get(position);
-                mViewModel.choseSongToPlay(selectedSong);
-                break;
-            case 2:
-                if(currentItems.get(position) instanceof AlbumModel) {
-                    AlbumModel selectedAlbum = (AlbumModel) currentItems.get(position);
-                    HomeActivity activity = (HomeActivity) getActivity();
-                    activity.navigateToSongList(selectedAlbum);
-                    //List<Song> songsOfAlbum = mViewModel.getSongsForAlbum(selectedAlbum);
-
-                    //createNewListFragment(songsOfAlbum);
-                    //mAdapter.setData(mViewModel.getSongsForAlbum(selectedAlbum));
-                }
-                break;
-            case 3:
-                //recreateAdapter(R.layout.song_item);
-                currentItems = mViewModel.getFormattedSongList(pageType);
-                if(currentItems.get(position) instanceof ArtistModel) {
-                    ArtistModel selectedArtist = (ArtistModel) currentItems.get(position);
-                    HomeActivity activity = (HomeActivity) getActivity();
-                    activity.navigateToSongList(selectedArtist);
-                    //List<Song> songsOfArtist = mViewModel.getSongsForArtist(selectedArtist);
-                    //createNewListFragment(songsOfArtist);
-                }
-                break;
+        if(parentItem instanceof ArtistModel) {
+            currentItems = mViewModel.getSongsForArtist((ArtistModel) parentItem);
         }
     }
 
-//    private void createNewListFragment(List<Song> songs) {
-//        Log.d(TAG, "createNewListFragment");
-//
-//        FragmentManager fragmentManager = getChildFragmentManager();
-//        FragmentTransaction fragTransaction = fragmentManager.beginTransaction();
-//
-//        Bundle bundle = new Bundle();
-//        bundle.putInt(PagerAdapter.LAYOUT_ID, R.layout.song_item);
-//        bundle.putInt(PagerAdapter.LAYOUT_POSITION, 1);
-//
-//        SongListFragment fragment = new SongListFragment();
-//        fragment.setArguments(bundle);
-//        fragment.currentItems = songs;
-//        fragTransaction.replace(R.id.song_list_fragment, fragment);
-////        fragTransaction.addToBackStack("B");
-//        fragTransaction.commitNow();
-//    }
-
-//    private void recreateAdapter(int layoutId) {
-//        mAdapter = new MusicAdapter(layoutId, mSongDisplayType);
-//        mAdapter.onClickListener = (v, position) -> {
-//            choseClickAction(position);
-//        };
-//        mRecyclerView.setAdapter(mAdapter);
-//    }
+    protected void choseClickAction(int position) {
+        Song selectedSong = (Song) currentItems.get(position);
+        mViewModel.choseSongToPlay(selectedSong);
+    }
 }

@@ -25,8 +25,56 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_songListFragment_self"
-            app:destination="@id/songListFragment"
-            app:enterAnim="@anim/slide_in_right" app:exitAnim="@anim/slide_out_left" app:popEnterAnim="@anim/slide_in_left" app:popExitAnim="@anim/slide_out_right"/>
+            android:id="@+id/action_songListFragment_to_albumListFragment"
+            app:destination="@id/albumListFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_artistListFragment"
+            app:destination="@id/artistListFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_songStatusFragment2"
+            app:destination="@id/songStatusFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_artistListFragment2"
+            app:destination="@id/artistListFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_albumListFragment2"
+            app:destination="@id/albumListFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_songStatusFragment3"
+            app:destination="@id/songStatusFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/artistListFragment"
+        android:name="com.elzette.myplayerapp.ui.ArtistListFragment"
+        android:label="ArtistListFragment" >
+        <action
+            android:id="@+id/action_artistListFragment_to_songStatusFragment"
+            app:destination="@id/songStatusFragment" />
+        <action
+            android:id="@+id/action_artistListFragment_to_songListFragment"
+            app:destination="@id/songListFragment" />
+        <action
+            android:id="@+id/action_artistListFragment_to_albumListFragment"
+            app:destination="@id/albumListFragment" />
+        <action
+            android:id="@+id/action_artistListFragment_to_songStatusFragment2"
+            app:destination="@id/songStatusFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/albumListFragment"
+        android:name="com.elzette.myplayerapp.ui.AlbumListFragment"
+        android:label="AlbumListFragment" >
+        <action
+            android:id="@+id/action_albumListFragment_to_songStatusFragment"
+            app:destination="@id/songStatusFragment" />
+        <action
+            android:id="@+id/action_albumListFragment_to_artistListFragment"
+            app:destination="@id/artistListFragment" />
+        <action
+            android:id="@+id/action_albumListFragment_to_songListFragment"
+            app:destination="@id/songListFragment" />
+        <action
+            android:id="@+id/action_albumListFragment_to_songStatusFragment2"
+            app:destination="@id/songStatusFragment" />
     </fragment>
 </navigation>

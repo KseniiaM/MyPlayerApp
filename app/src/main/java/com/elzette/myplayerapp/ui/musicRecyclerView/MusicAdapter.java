@@ -12,23 +12,30 @@ import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.databinding.ArtistItemBinding;
 import com.elzette.myplayerapp.models.MusicItemBaseModel;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MusicAdapter extends RecyclerView.Adapter<BaseMusicViewHolder> {
 
+    public static final int SONG_VIEW_HOLDER_ID = 1;
+    public static final int ALBUM_VIEW_HOLDER_ID = 2;
+    public static final int ARTIST_VIEW_HOLDER_ID = 3;
+
     public RecyclerItemsClickListener onClickListener;
     private List<? extends MusicItemBaseModel> items = new ArrayList<>();
     private int mViewHolderType;
+    private int mViewHolderLayoutId;
 
     public void setData(List<? extends MusicItemBaseModel> data) {
         items = data;
         notifyDataSetChanged();
     }
 
-    public MusicAdapter(int viewHolderType)
+    public MusicAdapter(int viewHolderType, int layoutId)
     {
         mViewHolderType = viewHolderType;
+        mViewHolderLayoutId = layoutId;
     }
 
     @NonNull
@@ -36,19 +43,15 @@ public class MusicAdapter extends RecyclerView.Adapter<BaseMusicViewHolder> {
     public BaseMusicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        ViewDataBinding binding;
+        ViewDataBinding binding = DataBindingUtil.inflate(inflater, mViewHolderLayoutId, parent, false);
         switch (mViewHolderType) {
-            case 1:
-                binding = DataBindingUtil.inflate(inflater, R.layout.song_item, parent, false);
+            case SONG_VIEW_HOLDER_ID:
                 return new BaseMusicViewHolder(binding, onClickListener, mViewHolderType);
-            case 2:
-                binding = DataBindingUtil.inflate(inflater, R.layout.album_item, parent, false);
+            case ALBUM_VIEW_HOLDER_ID:
                 return new AlbumViewHolder(binding, onClickListener, mViewHolderType);
-            case 3:
-                binding = DataBindingUtil.inflate(inflater, R.layout.artist_item, parent, false);
+            case ARTIST_VIEW_HOLDER_ID:
                 return new ArtistViewHolder(binding, onClickListener, mViewHolderType);
             default:
-                binding = DataBindingUtil.inflate(inflater, R.layout.song_item, parent, false);
                 return new BaseMusicViewHolder(binding, onClickListener, mViewHolderType);
         }
     }
@@ -57,14 +60,14 @@ public class MusicAdapter extends RecyclerView.Adapter<BaseMusicViewHolder> {
     public void onBindViewHolder(@NonNull BaseMusicViewHolder holder, int position) {
         Object obj = getObjForPosition(position);
         switch (holder.getItemViewType()) {
-            case 1:
+            case SONG_VIEW_HOLDER_ID:
                 holder.bind(obj);
                 break;
-            case 2:
+            case ALBUM_VIEW_HOLDER_ID:
                 AlbumViewHolder albumVh = (AlbumViewHolder) holder;
                 albumVh.bind(obj);
                 break;
-            case 3:
+            case ARTIST_VIEW_HOLDER_ID:
                 ArtistViewHolder artistVh = (ArtistViewHolder) holder;
                 artistVh.bind(obj);
         }

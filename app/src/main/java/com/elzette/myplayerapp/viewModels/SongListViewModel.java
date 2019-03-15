@@ -64,20 +64,20 @@ public class SongListViewModel extends AndroidViewModel implements
         int songPosition = songsLiveData.getValue().indexOf(song);
         playerConnectionManager.playSelectedSong(songPosition);
     }
-
-    public List<? extends MusicItemBaseModel> getFormattedSongList(int itemId) {
-        switch (itemId) {
-            case 1:
-                return getSongsLiveData().getValue();
-            case 2:
-                return getAlbums(getSongsLiveData().getValue());
-            case 3:
-                //return getArtists(getSongsLiveData().getValue());
-                return getArtists(getSongsLiveData().getValue());
-            default:
-                return new ArrayList<>();
-        }
-    }
+//
+//    public List<? extends MusicItemBaseModel> getFormattedSongList(int itemId) {
+//        switch (itemId) {
+//            case 1:
+//                return getSongsLiveData().getValue();
+//            case 2:
+//                return getAlbums(getSongsLiveData().getValue());
+//            case 3:
+//                //return getArtists(getSongsLiveData().getValue());
+//                return getArtists(getSongsLiveData().getValue());
+//            default:
+//                return new ArrayList<>();
+//        }
+//    }
 
     public List<Song> getSongsForArtist(ArtistModel artist) {
         return Observable.fromIterable(songsLiveData.getValue())
@@ -125,7 +125,8 @@ public class SongListViewModel extends AndroidViewModel implements
 //        return m;
 //    }
 
-    private List<AlbumModel> getAlbums(List<Song> songs) {
+    public List<AlbumModel> getAlbums() {
+        List<Song> songs = getSongsLiveData().getValue();
         List<AlbumModel> albums = new ArrayList<>();
         long songCount;
         List<Song> songsWithUniqueAlbum = Observable.fromIterable(songs).distinct(item -> item.getAlbum()).toList().blockingGet();
@@ -139,7 +140,8 @@ public class SongListViewModel extends AndroidViewModel implements
         return albums;
     }
 
-    private List<ArtistModel> getArtists(List<Song> songs) {
+    public List<ArtistModel> getArtists() {
+        List<Song> songs = getSongsLiveData().getValue();
         List<ArtistModel> artists = new ArrayList<>();
         long songCount;
         List<Song> songsWithUniqueArtist = Observable.fromIterable(songs).distinct(item -> item.getArtist()).toList().blockingGet();

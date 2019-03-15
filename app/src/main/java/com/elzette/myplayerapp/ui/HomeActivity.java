@@ -7,23 +7,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.elzette.myplayerapp.Helpers.PermissionManager;
 import com.elzette.myplayerapp.R;
 import com.elzette.myplayerapp.models.AlbumModel;
 import com.elzette.myplayerapp.models.ArtistModel;
-import com.elzette.myplayerapp.ui.pager.PagerAdapter;
 import com.elzette.myplayerapp.viewModels.HomeViewModel;
 
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
-public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
+public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener, NavController.OnNavigatedListener {
 
     public final static String LAYOUT_POSITION = "layout position";
     public final static String SERIALIZED_MODEL = "model";
@@ -48,23 +47,24 @@ public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSe
             mViewModel.loadMusicData();
         }
 
+        mNavController.addOnNavigatedListener(this);
         mNavController.navigate(R.id.songStatusFragment);
     }
 
-    public void navigateToSongList(int tabPosition) {
-        mNavController.navigate(R.id.songListFragment, createBundle(tabPosition), addAnimations());
+    public void navigateToSongList(int layoutId) {
+        mNavController.navigate(layoutId, null, addAnimations(R.id.songStatusFragment));
     }
 
     public void navigateToSongList(AlbumModel model) {
-        Bundle bundle = createBundle(1);
+        Bundle bundle = new Bundle();
         bundle.putSerializable("model", model);
-        mNavController.navigate(R.id.songListFragment, bundle, addAnimations());
+        mNavController.navigate(R.id.songListFragment, bundle, addAnimations(R.id.albumListFragment));
     }
 
     public void navigateToSongList(ArtistModel model) {
-        Bundle bundle = createBundle(1);
+        Bundle bundle = new Bundle();
         bundle.putSerializable("model", model);
-        mNavController.navigate(R.id.songListFragment, bundle, addAnimations());
+        mNavController.navigate(R.id.songListFragment, bundle, addAnimations(R.id.artistListFragment));
     }
 
     private Bundle createBundle( int tabPosition) {
@@ -118,16 +118,16 @@ public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSe
                 mNavController.navigate(R.id.songStatusFragment);
                 break;
             case 1:
-                navigateToSongList(1);
+                navigateToSongList(R.id.songListFragment);
                 break;
             case 2:
-                navigateToSongList(2);
+                navigateToSongList(R.id.albumListFragment);
                 break;
             case 3:
-                navigateToSongList(3);
+                navigateToSongList(R.id.albumListFragment);
                 break;
             default:
-                navigateToSongList(1);
+                navigateToSongList(R.id.songStatusFragment);
                 break;
         }
     }
@@ -140,6 +140,17 @@ public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSe
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
 
+    }
+
+    @Override
+    public void onNavigated(@NonNull NavController controller, @NonNull NavDestination destination) {
+        if(destination.getId() == R.id.songStatusFragment) {
+            TabLayout.Tab tab = mTabLayout.getTabAt(0);
+
+            if(tab != null) {
+                tab.select();
+            }
+        }
     }
 
     public class HeadphonesUnpluggedReceiver extends BroadcastReceiver {
@@ -164,12 +175,13 @@ public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSe
         }
     }
 
-    private NavOptions addAnimations() {
+    private NavOptions addAnimations(int popUpDestinationId) {
         return new NavOptions.Builder()
                 .setEnterAnim(R.anim.slide_in_right)
                 .setExitAnim(R.anim.slide_out_left)
                 .setPopEnterAnim(R.anim.slide_in_left)
                 .setPopExitAnim(R.anim.slide_out_right)
+                .setPopUpTo(popUpDestinationId, false)
                 .build();
     }
 //    @Override
