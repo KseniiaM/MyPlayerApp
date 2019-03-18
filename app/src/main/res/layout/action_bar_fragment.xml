@@ -12,58 +12,79 @@
 
     </data>
 
-    <android.support.constraint.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="@color/greyBackgroundColor"
-        android:elevation="4dp"
-        android:translationZ="8dp"
-        android:padding="10dp">
+        <android.support.constraint.ConstraintLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:background="@color/greyBackgroundColor"
+            android:elevation="4dp"
+            android:translationZ="8dp"
+            android:padding="10dp"
+            android:layout_margin="0dp">
 
-        <ImageButton
-            android:id="@+id/cycle"
-            android:src="@drawable/repeat"
-            app:layout_constraintEnd_toStartOf="@+id/prev"
-            app:layout_constraintStart_toStartOf="parent"
-            android:clickable="@{viewModel.canPlayMusic}"
-            style="@style/ActionBarButtonStyle"/>
+            <include layout="@layout/seek_bar_layout"
+                android:id="@+id/seek_bar"
+                android:background="@color/greyBackgroundColor"
+                android:layout_height="1dp"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/play"
+                android:layout_marginBottom="@dimen/action_bar_spacing"
+                />
 
-        <ImageButton
-            android:id="@+id/prev"
-            android:src="@drawable/previous"
-            app:layout_constraintEnd_toStartOf="@+id/play"
-            app:layout_constraintStart_toEndOf="@+id/cycle"
-            style="@style/ActionBarButtonStyle"
-            android:clickable="@{viewModel.canPlayMusic}"
-            android:onClick="@{() -> viewModel.onPrevClick()}"/>
+            <!--<android.support.constraint.Guideline-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--app:layout_constraintHeight_percent="20"/>-->
 
-        <ImageButton
-            android:id="@+id/play"
-            android:src="@{viewModel.isPlaying ? @drawable/pause : @drawable/play}"
-            app:layout_constraintEnd_toStartOf="@+id/next"
-            app:layout_constraintStart_toEndOf="@+id/prev"
-            style="@style/ActionBarButtonStyle"
-            android:clickable="@{viewModel.canPlayMusic}"
-            android:onClick="@{() -> viewModel.isPlaying ? viewModel.onPauseClick() : viewModel.onPlayClick()}"/>
+            <ImageButton
+                android:id="@+id/cycle"
+                android:src="@drawable/repeat"
+                app:layout_constraintTop_toBottomOf="@+id/seek_bar"
+                app:layout_constraintEnd_toStartOf="@+id/prev"
+                app:layout_constraintStart_toStartOf="parent"
+                android:clickable="@{viewModel.canPlayMusic}"
+                style="@style/ActionBarButtonStyle"/>
 
-        <ImageButton
-            android:id="@+id/next"
-            android:src="@drawable/next"
-            app:layout_constraintEnd_toStartOf="@+id/shuffle"
-            app:layout_constraintStart_toEndOf="@+id/play"
-            style="@style/ActionBarButtonStyle"
-            android:clickable="@{viewModel.canPlayMusic}"
-            android:onClick="@{() -> viewModel.onNextClick()}"/>
+            <ImageButton
+                android:id="@+id/prev"
+                android:src="@drawable/previous"
+                app:layout_constraintTop_toBottomOf="@+id/seek_bar"
+                app:layout_constraintEnd_toStartOf="@+id/play"
+                app:layout_constraintStart_toEndOf="@+id/cycle"
+                style="@style/ActionBarButtonStyle"
+                android:clickable="@{viewModel.canPlayMusic}"
+                android:onClick="@{() -> viewModel.onPrevClick()}"/>
 
-        <ImageButton
-            android:id="@+id/shuffle"
-            android:src="@drawable/shuffle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/next"
-            android:clickable="@{viewModel.canPlayMusic}"
-            style="@style/ActionBarButtonStyle"/>
+            <ImageButton
+                android:id="@+id/play"
+                android:src="@{viewModel.isPlaying ? @drawable/pause : @drawable/play}"
+                app:layout_constraintTop_toBottomOf="@+id/seek_bar"
+                app:layout_constraintEnd_toStartOf="@+id/next"
+                app:layout_constraintStart_toEndOf="@+id/prev"
+                style="@style/ActionBarButtonStyle"
+                android:clickable="@{viewModel.canPlayMusic}"
+                android:onClick="@{() -> viewModel.isPlaying ? viewModel.onPauseClick() : viewModel.onPlayClick()}"/>
 
-    </android.support.constraint.ConstraintLayout>
+            <ImageButton
+                android:id="@+id/next"
+                android:src="@drawable/next"
+                app:layout_constraintTop_toBottomOf="@+id/seek_bar"
+                app:layout_constraintEnd_toStartOf="@+id/shuffle"
+                app:layout_constraintStart_toEndOf="@+id/play"
+                style="@style/ActionBarButtonStyle"
+                android:clickable="@{viewModel.canPlayMusic}"
+                android:onClick="@{() -> viewModel.onNextClick()}"/>
+
+            <ImageButton
+                android:id="@+id/shuffle"
+                android:src="@drawable/shuffle"
+                app:layout_constraintTop_toBottomOf="@+id/seek_bar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/next"
+                android:clickable="@{viewModel.canPlayMusic}"
+                style="@style/ActionBarButtonStyle"/>
+
+        </android.support.constraint.ConstraintLayout>
 
 </layout>
