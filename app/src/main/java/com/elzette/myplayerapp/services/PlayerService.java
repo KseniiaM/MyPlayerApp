@@ -6,13 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.elzette.myplayerapp.App;
+import com.elzette.myplayerapp.Helpers.SeekBarConverterUtil;
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
+import com.elzette.myplayerapp.callbacks.SongChangedCallback;
 import com.elzette.myplayerapp.callbacks.UpdateCollectionCallback;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.providers.MediaPlayerProvider;
@@ -29,10 +29,18 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
 
     public static final String AUDIO_FILE_DATA = "audio_file_data";
 
+    @Inject
+    MusicFileSystemScanner scanner;
+
+    @Inject
+    PlayerConnectionManager connectionManager;
+
     private List<Song> songs = new ArrayList<>();
     private String mediaFilePath;
     private int currentSongIndex;
-    private IsMusicPlayingCallback callback;
+
+//    private IsMusicPlayingCallback musicPlayingCallback;
+//    private SongChangedCallback songChangedCallback;
 
     private MediaPlayerProvider mediaPlayerProvider;
     private NotificationProvider notificationProvider;
@@ -45,34 +53,7 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         }
     };
 
-//    public BroadcastReceiver notificationButtonBroadcastReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context ctx, Intent intent) {
-//            switch (intent.getStringExtra("extra")) {
-//                case "prev":
-//                    playPrevSong();
-//                    break;
-//                case "play":
-//                    playMedia();
-//                    break;
-//                case "pause":
-//                    pauseMedia();
-//                    break;
-//                case "next":
-//                    playNextSong();
-//                    break;
-//                case "close":
-//                    stopForeground(true);
-//                    ctx.getApplicationContext().unbindService((ServiceConnection) callback);
-//                    break;
-//            }
-//        }
-//    };
-
     private final IBinder iBinder = new LocalBinder();
-
-    @Inject
-    MusicFileSystemScanner scanner;
 
     //TODO will start observing the song list here
     @Override
@@ -90,10 +71,9 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
 
         ((App) getApplication()).playerComponent.injectPlayerProviderComponent(this);
         scanner.setUpdateCollectionCallback(this);
-        //subscribeToNotificationButtonBroadcast();
 
         songs = scanner.getSongs();
-        mediaPlayerProvider = new MediaPlayerProvider();
+        mediaPlayerProvider = new MediaPlayerProvider(this);
         IntentFilter filter = new IntentFilter(PlayerConnectionManager.PLAY_NEW_SONG);
         registerReceiver(playNewAudioReceiver, filter);
 
@@ -125,12 +105,14 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         currentSongIndex = currentSongIndex < (songs.size() - 1) ? currentSongIndex + 1 : 0;
         mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
         notifyOnMusicStateChange(true);
+        connectionManager.updateNewSongDuration(songs.get(currentSongIndex).getDuration());
     }
 
     public void playPrevSong() {
         currentSongIndex = currentSongIndex == 0 ? songs.size() - 1 : currentSongIndex - 1;
         mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
         notifyOnMusicStateChange(true);
+        connectionManager.updateNewSongDuration(songs.get(currentSongIndex).getDuration());
     }
 
     public void playSelectedSong(int index) {
@@ -138,6 +120,25 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
             currentSongIndex = index;
             mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
             notifyOnMusicStateChange(true);
+            connectionManager.updateNewSongDuration(songs.get(currentSongIndex).getDuration());
+        }
+    }
+
+    public void updateSongProgress(int progress) {
+        int songDuration = songs.get(currentSongIndex).getDuration();
+        mediaPlayerProvider.seekToPosition(SeekBarConverterUtil.progressToTime(progress, songDuration));
+    }
+
+    public int updateSongDurations() {
+        long totalDuration = songs.get(currentSongIndex).getDuration();
+        long currentDuration = mediaPlayerProvider.getCurrentSongProgress();
+
+        boolean isCurrentDurationValid = currentDuration >= 0 && currentDuration < totalDuration;
+        if (isCurrentDurationValid) {
+            return SeekBarConverterUtil.getProgressPercentage(currentDuration, totalDuration);
+        }
+        else {
+            return 0;
         }
     }
 
@@ -180,23 +181,24 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         }
     }
 
-//    private void subscribeToNotificationButtonBroadcast() {
-//        Log.d("Notification","subscribeToNotificationButtonBroadcast" + getApplicationContext());
-//        IntentFilter filter = new IntentFilter(NotificationProvider.NOTIFICATION_INTENT_FILTER);
-//        filter.addCategory(Intent.CATEGORY_DEFAULT);
-//        getApplicationContext().registerReceiver(notificationButtonBroadcastReceiver, filter);
-//    }
-//
-//    private void unsubscribeFromNotificationButtons() {
-//        getApplicationContext().unregisterReceiver(notificationButtonBroadcastReceiver);
-//    }
-
     private void notifyOnMusicStateChange(boolean isPlayingState) {
-        callback.changeMusicPlaybackState(isPlayingState);
+        connectionManager.notifyIsMusicPlayingCallbacks(isPlayingState);
         notificationProvider.updateNotification(songs.get(currentSongIndex), isPlayingState);
     }
 
-    public void setIsMusicPlayingCallback(IsMusicPlayingCallback callback) {
-        this.callback = callback;
-    }
+//    public void setIsMusicPlayingCallback(IsMusicPlayingCallback callback) {
+//        this.musicPlayingCallback = callback;
+//    }
+//
+//    public void removeMusicPlayingCallback() {
+//        this.musicPlayingCallback = null;
+//    }
+//
+//    public void setSongChangedCallback(SongChangedCallback callback) {
+//        this.songChangedCallback = callback;
+//    }
+//
+//    public void removeMusicPlayingCallback() {
+//        this.songChangedCallback = null;
+//    }
 }

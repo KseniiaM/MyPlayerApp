@@ -5,6 +5,8 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.Log;
 
+import com.elzette.myplayerapp.services.PlayerService;
+
 import java.io.IOException;
 
 public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
@@ -12,70 +14,82 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
                                             MediaPlayer.OnErrorListener,
                                             AudioManager.OnAudioFocusChangeListener{
 
-    private MediaPlayer mediaPlayer;
+    private MediaPlayer mMediaPlayer;
     //private AudioManager audioManager;
-
+    private PlayerService mService;
     private int resumePosition;
+
+    public MediaPlayerProvider(PlayerService service) {
+        mService = service;
+    }
 
     public void startPlayer(String mediaFilePath) {
         initMediaPlayer(mediaFilePath);
     }
 
     private void initMediaPlayer(String mediaFilePath) {
-        if(mediaPlayer == null) {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setOnCompletionListener(this);
-            mediaPlayer.setOnErrorListener(this);
-            mediaPlayer.setOnPreparedListener(this);
+        if(mMediaPlayer == null) {
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setOnCompletionListener(this);
+            mMediaPlayer.setOnErrorListener(this);
+            mMediaPlayer.setOnPreparedListener(this);
         }
 
-        mediaPlayer.reset();
+        mMediaPlayer.reset();
         resumePosition = 0;
         //TODO change this and not use deprecated method
 
-        mediaPlayer.setAudioAttributes(getAttributes());
+        mMediaPlayer.setAudioAttributes(getAttributes());
         try {
             // Set the data source to the mediaFile location
-            mediaPlayer.setDataSource(mediaFilePath);
-            mediaPlayer.prepareAsync();
+            mMediaPlayer.setDataSource(mediaFilePath);
+            mMediaPlayer.prepareAsync();
         } catch (IOException e) {
-            mediaPlayer.release();
-            mediaPlayer = null;
+            mMediaPlayer.release();
+            mMediaPlayer = null;
             e.printStackTrace();
         }
     }
 
     public void playMedia() {
-        if (mediaPlayer == null) return;
+        if (mMediaPlayer == null) return;
 
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.seekTo(resumePosition);
-            mediaPlayer.start();
+        if (!mMediaPlayer.isPlaying()) {
+            mMediaPlayer.seekTo(resumePosition);
+            mMediaPlayer.start();
         }
     }
 
     public void stopMedia() {
-        if (mediaPlayer == null) return;
+        if (mMediaPlayer == null) return;
 
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
             resumePosition = 0;
         }
     }
 
     public void pauseMedia() {
-        if (mediaPlayer == null) return;
+        if (mMediaPlayer == null) return;
 
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            resumePosition = mediaPlayer.getCurrentPosition();
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+            resumePosition = mMediaPlayer.getCurrentPosition();
         }
     }
 
+    public void seekToPosition(int millis) {
+        mMediaPlayer.seekTo(millis);
+    }
+
+    public long getCurrentSongProgress() {
+        return mMediaPlayer.getCurrentPosition();
+    }
+
     public void destroyMediaPlayer() {
-        if (mediaPlayer != null) {
+        if (mMediaPlayer != null) {
             stopMedia();
-            mediaPlayer.release();
+            mMediaPlayer.release();
         }
         //removeAudioFocus();
     }
@@ -104,7 +118,7 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        stopMedia();
+        mService.playNextSong();
     }
 
     private AudioAttributes getAttributes() {
@@ -136,35 +150,35 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 // resume playback
-                if (mediaPlayer == null) {
+                if (mMediaPlayer == null) {
                     initMediaPlayer("");
                 }
-                else if (!mediaPlayer.isPlaying()) {
-                    mediaPlayer.start();
+                else if (!mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.start();
                 }
-                mediaPlayer.setVolume(1.0f, 1.0f);
+                mMediaPlayer.setVolume(1.0f, 1.0f);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media player
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.stop();
                 }
-                mediaPlayer.release();
-                mediaPlayer = null;
+                mMediaPlayer.release();
+                mMediaPlayer = null;
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 // Lost focus for a short time, but we have to stop
                 // playback. We don't release the media player because playback
                 // is likely to resume
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 // Lost focus for a short time, but it's ok to keep playing
                 // at an attenuated level
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.setVolume(0.1f, 0.1f);
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.setVolume(0.1f, 0.1f);
                 }
                 break;
         }

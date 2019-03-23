@@ -14,12 +14,14 @@ public class Song implements MusicItemBaseModel {
     private String title;
     private String album;
     private String artist;
+    private int duration;
 
-    public Song(String data, String title, String album, String artist) {
+    public Song(String data, String title, String album, String artist, int duration) {
         this.data = data;
         this.title = title;
         this.album = album;
         this.artist = artist;
+        this.duration = duration;
     }
 
     public String getData() {
@@ -49,6 +51,8 @@ public class Song implements MusicItemBaseModel {
     public String getArtist() {
         return artist;
     }
+
+    public int getDuration() { return duration; }
 
 //    public void setArtist(String artist) {
 //        this.artist = artist;

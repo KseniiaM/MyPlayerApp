@@ -76,9 +76,10 @@ public class MusicFileSystemScanner {
                 String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
 
                 // Save to db
-                Song songToAdd = new Song(data, title, album, artist);
+                Song songToAdd = new Song(data, title, album, artist, duration);
                 tempSongListInsteadOfDb.add(songToAdd);
                 //dbManager.addSong(songToAdd);
                 //songsLiveData.getValue().add(songToAdd);

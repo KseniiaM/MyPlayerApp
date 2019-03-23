@@ -10,13 +10,16 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
+import com.elzette.myplayerapp.callbacks.SongChangedCallback;
 import com.elzette.myplayerapp.services.PlayerService;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceConnection{
+public class PlayerConnectionManager implements //IsMusicPlayingCallback,
+                                                //SongChangedCallback,
+                                                ServiceConnection{
 
     public static final String PLAY_NEW_SONG = "Play new song";
     public static final String SONG_DATA = "Song data";
@@ -26,13 +29,15 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
     boolean serviceBound = false;
 
     private List<IsMusicPlayingCallback> isMusicPlayingCallbacks = new ArrayList<>();
+    private List<SongChangedCallback> songChangedCallbacks = new ArrayList<>();
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
         playerService = binder.getService();
         serviceBound = true;
-        playerService.setIsMusicPlayingCallback(this);
+//        playerService.setIsMusicPlayingCallback(this);
+//        playerService.se
         subscribeToNotificationButtonBroadcast();
     }
 
@@ -40,6 +45,7 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
     public void onServiceDisconnected(ComponentName name) {
         serviceBound = false;
         unsubscribeFromNotificationButtons();
+        //playerService.removeMusicPlayingCallback();
     }
 
     public PlayerConnectionManager(Context context) {
@@ -83,6 +89,14 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
         }
     }
 
+    public void changeSongProgress(int progress) {
+        playerService.updateSongProgress(progress);
+    }
+
+    public int updateSongDurations() {
+        return playerService.updateSongDurations();
+    }
+
     public void setIsMusicPlayingCallback(IsMusicPlayingCallback isMusicPlayingCallback) {
         isMusicPlayingCallbacks.add(isMusicPlayingCallback);
     }
@@ -91,16 +105,30 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
         isMusicPlayingCallbacks.remove(callback);
     }
 
-    private void notifyIsMusicPlayingCallbacks(boolean state) {
+    public void notifyIsMusicPlayingCallbacks(boolean state) {
         for (IsMusicPlayingCallback callback: isMusicPlayingCallbacks) {
             callback.changeMusicPlaybackState(state);
         }
     }
 
-    @Override
-    public void changeMusicPlaybackState(boolean isPlaying) {
-        notifyIsMusicPlayingCallbacks(isPlaying);
+    public void setSongChangedCallback(SongChangedCallback callback) {
+        songChangedCallbacks.add(callback);
     }
+
+    public void removeSongChangedCallback(SongChangedCallback callback) {
+        songChangedCallbacks.remove(callback);
+    }
+
+    public void updateNewSongDuration(int duration) {
+        for (SongChangedCallback callback: songChangedCallbacks) {
+            callback.updateNewSongDuration(duration);
+        }
+    }
+
+//    @Override
+//    public void changeMusicPlaybackState(boolean isPlaying) {
+//        notifyIsMusicPlayingCallbacks(isPlaying);
+//    }
 
     private void startPlayerService(int position) {
         Intent playerIntent = new Intent(context.get(), PlayerService.class);
@@ -146,4 +174,9 @@ public class PlayerConnectionManager implements IsMusicPlayingCallback, ServiceC
     private void unsubscribeFromNotificationButtons() {
         context.get().unregisterReceiver(notificationButtonBroadcastReceiver);
     }
+
+//    @Override
+//    public void updateNewSongDuration(int duration) {
+//        notifySongChangedCallbacks(duration);
+//    }
 }
