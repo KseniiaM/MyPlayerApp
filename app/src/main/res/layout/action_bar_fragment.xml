@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="actionBarFragment"
             type="com.elzette.myplayerapp.ui.ActionBarFragment" />
@@ -16,29 +16,27 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="110dp"
-        android:layout_margin="0dp"
+        android:layout_height="wrap_content"
         android:background="@color/greyBackgroundColor"
         android:elevation="4dp"
-        android:padding="10dp"
         android:translationZ="8dp">
 
         <TextView
             android:id="@+id/seek_duration"
-            android:layout_width="20dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            android:layout_margin="8dp"
             android:text="@{viewModel.currentPosition}"
             android:textColor="@color/darkGrayMainTextColor"
             android:textSize="@dimen/action_bar_duration_text_size"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/cycle"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <SeekBar
             android:id="@+id/seek_bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
             android:clickable="@{viewModel.canPlayMusic}"
             android:focusable="false"
             android:onStopTrackingTouch="@{() -> viewModel.changeSongProgress()}"
@@ -50,12 +48,12 @@
 
         <TextView
             android:id="@+id/song_duration"
-            android:layout_width="20dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
             android:text="@{viewModel.songDuration}"
             android:textColor="@color/darkGrayMainTextColor"
             android:textSize="@dimen/action_bar_duration_text_size"
-            app:layout_constraintBottom_toTopOf="@id/cycle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintTop_toTopOf="parent" />
@@ -63,18 +61,25 @@
         <ImageButton
             android:id="@+id/cycle"
             style="@style/ActionBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:clickable="@{viewModel.canPlayMusic}"
             android:src="@drawable/repeat"
-            app:layout_constraintEnd_toStartOf="@+id/prev"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/prev"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar" />
 
         <ImageButton
             android:id="@+id/prev"
             style="@style/ActionBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:clickable="@{viewModel.canPlayMusic}"
             android:onClick="@{() -> viewModel.onPrevClick()}"
             android:src="@drawable/previous"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/play"
             app:layout_constraintStart_toEndOf="@+id/cycle"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar" />
@@ -82,9 +87,12 @@
         <ImageButton
             android:id="@+id/play"
             style="@style/ActionBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:clickable="@{viewModel.canPlayMusic}"
             android:onClick="@{() -> viewModel.isPlaying ? viewModel.onPauseClick() : viewModel.onPlayClick()}"
             android:src="@{viewModel.isPlaying ? @drawable/pause : @drawable/play}"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/next"
             app:layout_constraintStart_toEndOf="@+id/prev"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar" />
@@ -92,9 +100,12 @@
         <ImageButton
             android:id="@+id/next"
             style="@style/ActionBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:clickable="@{viewModel.canPlayMusic}"
             android:onClick="@{() -> viewModel.onNextClick()}"
             android:src="@drawable/next"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/shuffle"
             app:layout_constraintStart_toEndOf="@+id/play"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar" />
@@ -102,8 +113,12 @@
         <ImageButton
             android:id="@+id/shuffle"
             style="@style/ActionBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
             android:clickable="@{viewModel.canPlayMusic}"
             android:src="@drawable/shuffle"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/next"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar" />
