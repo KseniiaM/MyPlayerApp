@@ -37,7 +37,6 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
 
         mMediaPlayer.reset();
         resumePosition = 0;
-        //TODO change this and not use deprecated method
 
         mMediaPlayer.setAudioAttributes(getAttributes());
         try {

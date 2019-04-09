@@ -11,8 +11,6 @@ import android.os.IBinder;
 
 import com.elzette.myplayerapp.App;
 import com.elzette.myplayerapp.Helpers.SeekBarConverterUtil;
-import com.elzette.myplayerapp.callbacks.IsMusicPlayingCallback;
-import com.elzette.myplayerapp.callbacks.SongChangedCallback;
 import com.elzette.myplayerapp.callbacks.UpdateCollectionCallback;
 import com.elzette.myplayerapp.dal.Song;
 import com.elzette.myplayerapp.providers.MediaPlayerProvider;
@@ -77,10 +75,6 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         IntentFilter filter = new IntentFilter(PlayerConnectionManager.PLAY_NEW_SONG);
         registerReceiver(playNewAudioReceiver, filter);
 
-        if (songs != null && songs.size() > currentSongIndex) {
-            mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
-        }
-
         runAsForeground();
     }
 
@@ -89,6 +83,11 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         Song song = songs.get(currentSongIndex);
         Notification notification = notificationProvider.createNotification(this, song);
         startForeground(NotificationProvider.NOTIFICATION_ID, notification);
+
+        if (songs != null && songs.size() > currentSongIndex) {
+            mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
+            connectionManager.setNewSong(songs.get(currentSongIndex));
+        }
     }
 
     public void playMedia() {
@@ -105,14 +104,14 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         currentSongIndex = currentSongIndex < (songs.size() - 1) ? currentSongIndex + 1 : 0;
         mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
         notifyOnMusicStateChange(true);
-        connectionManager.updateNewSongDuration(songs.get(currentSongIndex).getDuration());
+        connectionManager.setNewSong(songs.get(currentSongIndex));
     }
 
     public void playPrevSong() {
         currentSongIndex = currentSongIndex == 0 ? songs.size() - 1 : currentSongIndex - 1;
         mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
         notifyOnMusicStateChange(true);
-        connectionManager.updateNewSongDuration(songs.get(currentSongIndex).getDuration());
+        connectionManager.setNewSong(songs.get(currentSongIndex));
     }
 
     public void playSelectedSong(int index) {
@@ -120,7 +119,7 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
             currentSongIndex = index;
             mediaPlayerProvider.startPlayer(getMediaFilePathFromSongCollection());
             notifyOnMusicStateChange(true);
-            connectionManager.updateNewSongDuration(songs.get(currentSongIndex).getDuration());
+            connectionManager.setNewSong(songs.get(currentSongIndex));
         }
     }
 
@@ -129,7 +128,7 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         mediaPlayerProvider.seekToPosition(SeekBarConverterUtil.progressToTime(progress, songDuration));
     }
 
-    public int updateSongDurations() {
+    public int getSongDurationPercentage() {
         long totalDuration = songs.get(currentSongIndex).getDuration();
         long currentDuration = mediaPlayerProvider.getCurrentSongProgress();
 
@@ -140,6 +139,14 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
         else {
             return 0;
         }
+    }
+
+    public int getSongDuration() {
+        return (int) mediaPlayerProvider.getCurrentSongProgress();
+    }
+
+    public Song getCurrentSong() {
+        return songs.get(currentSongIndex);
     }
 
     private String getMediaFilePathFromSongCollection() {

@@ -48,29 +48,23 @@ public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSe
         }
 
         mNavController.addOnNavigatedListener(this);
-        mNavController.navigate(R.id.songStatusFragment);
+        mNavController.navigate(R.id.songStatusFragment, null, addAnimations(R.id.songStatusFragment));
     }
 
-    public void navigateToSongList(int layoutId) {
+    public void navigateToMusicList(int layoutId) {
         mNavController.navigate(layoutId, null, addAnimations(R.id.songStatusFragment));
     }
 
     public void navigateToSongList(AlbumModel model) {
         Bundle bundle = new Bundle();
         bundle.putSerializable("model", model);
-        mNavController.navigate(R.id.songListFragment, bundle, addAnimations(R.id.albumListFragment));
+        mNavController.navigate(R.id.songListFragment, bundle, addAnimations(R.id.songStatusFragment));
     }
 
     public void navigateToSongList(ArtistModel model) {
         Bundle bundle = new Bundle();
         bundle.putSerializable("model", model);
-        mNavController.navigate(R.id.songListFragment, bundle, addAnimations(R.id.artistListFragment));
-    }
-
-    private Bundle createBundle( int tabPosition) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(LAYOUT_POSITION, tabPosition);
-        return bundle;
+        mNavController.navigate(R.id.songListFragment, bundle, addAnimations(R.id.songStatusFragment));
     }
 
     @Override
@@ -118,16 +112,16 @@ public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSe
                 mNavController.navigate(R.id.songStatusFragment);
                 break;
             case 1:
-                navigateToSongList(R.id.songListFragment);
+                navigateToMusicList(R.id.songListFragment);
                 break;
             case 2:
-                navigateToSongList(R.id.albumListFragment);
+                navigateToMusicList(R.id.albumListFragment);
                 break;
             case 3:
-                navigateToSongList(R.id.albumListFragment);
+                navigateToMusicList(R.id.artistListFragment);
                 break;
             default:
-                navigateToSongList(R.id.songStatusFragment);
+                navigateToMusicList(R.id.songStatusFragment);
                 break;
         }
     }
@@ -181,7 +175,7 @@ public class HomeActivity extends AppCompatActivity implements TabLayout.OnTabSe
                 .setExitAnim(R.anim.slide_out_left)
                 .setPopEnterAnim(R.anim.slide_in_left)
                 .setPopExitAnim(R.anim.slide_out_right)
-                .setPopUpTo(popUpDestinationId, false)
+                .setPopUpTo(popUpDestinationId, true)
                 .build();
     }
 //    @Override

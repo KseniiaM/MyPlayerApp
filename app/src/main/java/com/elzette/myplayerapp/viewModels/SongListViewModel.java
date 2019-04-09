@@ -56,28 +56,10 @@ public class SongListViewModel extends AndroidViewModel implements
         return songsLiveData;
     }
 
-    public void choseSongToPlay(int position) {
-        playerConnectionManager.playSelectedSong(position);
-    }
-
     public void choseSongToPlay(Song song) {
         int songPosition = songsLiveData.getValue().indexOf(song);
         playerConnectionManager.playSelectedSong(songPosition);
     }
-//
-//    public List<? extends MusicItemBaseModel> getFormattedSongList(int itemId) {
-//        switch (itemId) {
-//            case 1:
-//                return getSongsLiveData().getValue();
-//            case 2:
-//                return getAlbums(getSongsLiveData().getValue());
-//            case 3:
-//                //return getArtists(getSongsLiveData().getValue());
-//                return getArtists(getSongsLiveData().getValue());
-//            default:
-//                return new ArrayList<>();
-//        }
-//    }
 
     public List<Song> getSongsForArtist(ArtistModel artist) {
         return Observable.fromIterable(songsLiveData.getValue())
@@ -92,38 +74,6 @@ public class SongListViewModel extends AndroidViewModel implements
                 .toList()
                 .blockingGet();
     }
-
-//    private List<ArtistModel> getArtists(List<Song> songs) {
-//        return Observable.fromIterable(songs)
-//                .groupBy(item -> item.getArtist())
-//                .map(item -> {
-//                    Song firstSong = item.firstElement().blockingGet();
-//                    long itemsCount = item.count().blockingGet();
-//                    return new ArtistModel(firstSong.getArtist(), itemsCount);
-//                })
-//                .toList()
-//                .blockingGet();
-//    }
-//
-//    private List<AlbumModel> getAlbums(List<Song> songs) {
-//        Log.d(TAG, "thread before " + Thread.currentThread().getId());
-//        List<AlbumModel> m = new ArrayList<>();
-//
-//        //List<Song> s = songs.stream().collect(Collectors.groupingBy(Song::getAlbum)).;
-//
-//                Observable.fromIterable(songs)
-//                .subscribeOn(AndroidSchedulers.mainThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                         .groupBy(item -> item.getAlbum())
-//                         .map(item -> {
-//                             Log.d(TAG, "thread inside " + Thread.currentThread().getId());
-//                             Song firstSong = item.firstElement().blockingGet();
-//                             long itemsCount = item.count().blockingGet();
-//                             return new AlbumModel(firstSong.getArtist(), firstSong.getAlbum(), itemsCount);
-//                         }).doOnNext(item -> m.add(0, item));
-//        Log.d(TAG, "thread after " + Thread.currentThread().getId());
-//        return m;
-//    }
 
     public List<AlbumModel> getAlbums() {
         List<Song> songs = getSongsLiveData().getValue();

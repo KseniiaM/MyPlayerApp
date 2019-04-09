@@ -112,5 +112,9 @@ public class SongListFragment extends Fragment {
     protected void choseClickAction(int position) {
         Song selectedSong = (Song) currentItems.get(position);
         mViewModel.choseSongToPlay(selectedSong);
+        HomeActivity activity = (HomeActivity) getActivity();
+        if(activity != null) {
+            activity.navigateToMusicList(R.id.songStatusFragment);
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.elzette.myplayerapp.callbacks;
 
+import com.elzette.myplayerapp.dal.Song;
+
 public interface SongChangedCallback {
 
-    void updateNewSongDuration(int duration);
+    void receiveNewCurrentSong(Song song);
 }

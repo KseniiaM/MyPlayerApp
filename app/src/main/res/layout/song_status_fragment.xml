@@ -1,10 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="song_status_fragment"/>
-</android.support.constraint.ConstraintLayout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="songStatusFragment"
+            type="com.elzette.myplayerapp.ui.SongStatusFragment" />
+
+        <variable
+            name="viewModel"
+            type="com.elzette.myplayerapp.viewModels.SongStatusViewModel" />
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/song_image"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_margin="20dp"
+            android:layout_marginBottom="50dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/treble_key"/>
+
+        <TextView
+            android:id="@+id/status_fragment_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/status_artist_font_size"
+            android:text="@{viewModel.artist}"
+            android:layout_below="@id/song_image"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="@dimen/layout_margin"
+            android:textColor="@color/darkGrayMainTextColor" />
+
+        <TextView
+            android:id="@+id/status_fragment_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/status_title_font_size"
+            android:text="@{viewModel.title}"
+            android:layout_gravity="center_horizontal"
+            android:layout_below="@id/status_fragment_artist"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="@dimen/layout_margin"
+            android:textColor="@color/darkGrayAdditionalTextColor" />
+
+    </RelativeLayout>
+
+</layout>
