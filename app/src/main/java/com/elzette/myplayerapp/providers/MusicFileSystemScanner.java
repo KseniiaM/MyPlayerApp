@@ -14,13 +14,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.Scheduler;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-
 public class MusicFileSystemScanner {
 
     WeakReference<Context> context;
@@ -32,10 +25,10 @@ public class MusicFileSystemScanner {
         this.context = new WeakReference<>(context);
         this.dbManager = dbManager;
 
-         Observable.just(songs.getValue())
-                   .subscribeOn(Schedulers.io())
-                   .observeOn(AndroidSchedulers.mainThread())
-                   .subscribe(value -> dbManager.saveSongsToDb(value));
+//         Observable.just(songs.getValue())
+//                   .subscribeOn(Schedulers.io())
+//                   .observeOn(AndroidSchedulers.mainThread())
+//                   .subscribe(value -> dbManager.saveSongsToDb(value));
     }
 
     public void setUpdateCollectionCallback(UpdateCollectionCallback callback) {
@@ -52,7 +45,7 @@ public class MusicFileSystemScanner {
 
     public void initSongStorage() {
         //checks if some of the songs already present, launch synchronous scan if not
-        Disposable isFirstLaunch = Observable.just(dbManager.isDbEmpty()).subscribeOn(Schedulers.computation()).subscribe();
+        //Disposable isFirstLaunch = Observable.just(dbManager.isDbEmpty()).subscribeOn(Schedulers.computation()).subscribe();
         if (true) {
             //launch sync scan
             loadSongs();
