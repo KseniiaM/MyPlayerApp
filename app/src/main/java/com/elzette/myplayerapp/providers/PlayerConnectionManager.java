@@ -105,6 +105,22 @@ public class PlayerConnectionManager implements //IsMusicPlayingCallback,
         return SeekBarConverterUtil.createTimeString(duration);
     }
 
+
+    public Song getCurrentSong() {
+        if(serviceBound) {
+            return playerService.getCurrentSong();
+        }
+        return null;
+    }
+
+    public void setLoopingState(boolean isLooping) {
+        playerService.setLoopingState(isLooping);
+    }
+
+    public void shullfle() {
+        playerService.shuffle();
+    }
+
     public void setIsMusicPlayingCallback(IsMusicPlayingCallback isMusicPlayingCallback) {
         isMusicPlayingCallbacks.add(isMusicPlayingCallback);
     }
@@ -133,11 +149,8 @@ public class PlayerConnectionManager implements //IsMusicPlayingCallback,
         }
     }
 
-    public Song getCurrentSong() {
-        if(serviceBound) {
-            return playerService.getCurrentSong();
-        }
-        return null;
+    public void updateSongsCollection(List<Song> songs) {
+        playerService.updateSongsSourceCollection(songs);
     }
 
     private void startPlayerService(int position) {

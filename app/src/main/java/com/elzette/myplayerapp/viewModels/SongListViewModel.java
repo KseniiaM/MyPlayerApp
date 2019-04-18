@@ -49,7 +49,11 @@ public class SongListViewModel extends AndroidViewModel implements
         //TODO check if this is needed
         ((App)app).playerComponent.injectPlayerProviderComponent(this);
         getSongsLiveData().setValue(scanner.getSongs());
-
+//
+//        Observable.just(songsLiveData.getValue())
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(value -> playerConnectionManager.updateSongsCollection(songsLiveData.getValue()));
     }
 
     public MutableLiveData<List<Song>> getSongsLiveData() {
@@ -94,7 +98,10 @@ public class SongListViewModel extends AndroidViewModel implements
         List<Song> songs = getSongsLiveData().getValue();
         List<ArtistModel> artists = new ArrayList<>();
         long songCount;
-        List<Song> songsWithUniqueArtist = Observable.fromIterable(songs).distinct(item -> item.getArtist()).toList().blockingGet();
+        List<Song> songsWithUniqueArtist = Observable.fromIterable(songs)
+                                                     .distinct(item -> item.getArtist())
+                                                     .toList()
+                                                     .blockingGet();
 
         for (Song song: songsWithUniqueArtist) {
             songCount = songs.stream()

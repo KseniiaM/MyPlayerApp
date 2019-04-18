@@ -19,7 +19,9 @@ import com.elzette.myplayerapp.providers.NotificationProvider;
 import com.elzette.myplayerapp.providers.PlayerConnectionManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -147,6 +149,19 @@ public class PlayerService extends Service implements UpdateCollectionCallback {
 
     public Song getCurrentSong() {
         return songs.get(currentSongIndex);
+    }
+
+    public void setLoopingState(boolean isLooping) {
+        mediaPlayerProvider.setLoopingState(isLooping);
+    }
+
+    public void shuffle() {
+        long seed = System.nanoTime();
+        Collections.shuffle(songs, new Random(seed));
+    }
+
+    public void updateSongsSourceCollection(List<Song> songs) {
+        this.songs = songs;
     }
 
     private String getMediaFilePathFromSongCollection() {

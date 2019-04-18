@@ -33,6 +33,7 @@ public class ActionBarViewModel extends AndroidViewModel implements
     public ObservableInt songProgress = new ObservableInt(0);
     public ObservableField<String> currentPosition = new ObservableField<>(ZERO_DURATION);
     public ObservableField<String> songDuration = new ObservableField<>(ZERO_DURATION);
+    public ObservableBoolean isLooping = new ObservableBoolean(false);
 
     private final Handler mHandler = new Handler();
     private final Runnable mUpdateTimeTask = new Runnable() {
@@ -79,6 +80,15 @@ public class ActionBarViewModel extends AndroidViewModel implements
 
     public void changeSongProgress() {playerConnectionManager.changeSongProgress(songProgress.get()); }
 
+    public void onLoopingClick() {
+        isLooping.set(!isLooping.get());
+        playerConnectionManager.setLoopingState(isLooping.get());
+    }
+
+    public void onShuffleClick() {
+        playerConnectionManager.shullfle();
+    }
+
     @Override
     public void onCollectionUpdated(List collection) {
         canPlayMusic = !(collection == null || collection.isEmpty());
@@ -103,7 +113,6 @@ public class ActionBarViewModel extends AndroidViewModel implements
         int duration = song.getDuration();
         songDuration.set(SeekBarConverterUtil.createTimeString(duration));
     }
-
 
     private void setSongDurationUpdateState(boolean isSongDurationUpdateNeeded) {
         if (isSongDurationUpdateNeeded) {

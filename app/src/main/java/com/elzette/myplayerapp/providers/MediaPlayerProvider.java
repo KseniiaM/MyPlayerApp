@@ -85,6 +85,10 @@ public class MediaPlayerProvider implements MediaPlayer.OnCompletionListener,
         return mMediaPlayer.getCurrentPosition();
     }
 
+    public void setLoopingState(boolean isLooping) {
+        mMediaPlayer.setLooping(isLooping);
+    }
+
     public void destroyMediaPlayer() {
         if (mMediaPlayer != null) {
             stopMedia();
